@@ -1,0 +1,55 @@
+name: One-time apply Szymbark photos on surroundings page
+
+on:
+  push:
+    branches:
+      - fix/szymbark-ilawa-images
+    paths:
+      - .github/workflows/apply-szymbark-okolica.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/szymbark-ilawa-images
+      - name: Replace Szymbark photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('okolica.html')
+          s=p.read_text(encoding='utf-8')
+          old_url='https://commons.wikimedia.org/wiki/Special:Redirect/file/Zamek%20w%20Szymbarku%20PJS10.JPG?width=1800'
+
+          # The summary card uses the current-ruins photo.
+          card_old=f'<div class="trip" id="pol-dnia"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="{old_url}"/>'
+          card_new='<div class="trip" id="pol-dnia"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-ruiny.jpg"/>'
+          if card_old not in s:
+              raise SystemExit('Szymbark summary card image not found')
+          s=s.replace(card_old,card_new,1)
+
+          # The expanded description shows the requested then/now pair.
+          figure_old=f'<figure class="place-photo"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="{old_url}"/><figcaption>Zamek w Szymbarku - fot. Piotr Salata (Pjsalata), CC BY-SA 3.0 PL, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Zamek_w_Szymbarku_PJS10.JPG" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure>'
+          pair='<div class="then-now castle-compare"><figure class="place-photo"><span class="mini">Kiedyś · ok. 1869–1870</span><img alt="Zamek w Szymbarku około 1869–1870 roku na litografii Alexandra Dunckera" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-1869-duncker.jpg"/><figcaption>Zamek w Szymbarku przed zniszczeniem · Alexander Duncker, ok. 1869–1870 · Polona / Wikimedia Commons · domena publiczna. <a href="https://commons.wikimedia.org/wiki/File:Schoenberg-Sammlung_Duncker_(5413840).jpg" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure><figure class="place-photo"><span class="mini">Dziś</span><img alt="Dzisiejsze ruiny zamku w Szymbarku, pierzeja wschodnia" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-ruiny.jpg"/><figcaption>Ruiny zamku w Szymbarku, pierzeja wschodnia · fot. 1bumer, CC BY-SA 4.0, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Szymbark,_zamek,_pierzeja_wschodnia.jpg" rel="noopener" target="_blank">Źródło i licencja ↗</a></figcaption></figure></div>'
+          if figure_old not in s:
+              raise SystemExit('Szymbark expanded photo block not found')
+          s=s.replace(figure_old,pair,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'siemiany-site-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/apply-szymbark-okolica.yml
+          git add okolica.html
+          git commit -m 'Use Szymbark then-and-now photos in surroundings guide'
+          git push origin HEAD:fix/szymbark-ilawa-images
