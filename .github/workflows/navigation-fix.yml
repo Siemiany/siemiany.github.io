@@ -1,0 +1,59 @@
+name: Navigation validation fix
+
+on:
+  push:
+    branches:
+      - navigation-cleanup
+    paths:
+      - .github/workflows/navigation-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: navigation-cleanup
+      - name: Fix and validate navigation markup
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          changed = []
+          for path in Path('.').glob('*.html'):
+              text = path.read_text(encoding='utf-8')
+              if '<div class="navlinks mega-nav">' not in text:
+                  continue
+              updated = text.replace('Pan Samochodzik<//a>', 'Pan Samochodzik</a>')
+              updated = updated.replace('>Jerzwald</a>', '>Jerzwałd</a>')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed.append(path.name)
+
+              nav = re.search(r'<div class="navlinks mega-nav">(.*?)</div></div></nav>', updated, re.S)
+              if not nav:
+                  raise SystemExit(f'Navigation block missing in {path}')
+              block = nav.group(1)
+              if '<//a>' in block:
+                  raise SystemExit(f'Invalid closing anchor in {path}')
+              if re.search(r'href="[^"]*#', block):
+                  raise SystemExit(f'Anchor link remains in global navigation: {path}')
+              if 'Czerwica</a>' in block or 'Gaudy</a>' in block or 'Karaś</a>' in block or 'Iłgi</a>' in block:
+                  raise SystemExit(f'Individual reserve remains in global navigation: {path}')
+
+          print('Fixed:', ', '.join(changed))
+          PY
+      - name: Commit fixes
+        shell: bash
+        run: |
+          rm .github/workflows/navigation-fix.yml
+          git config user.name "Siemiany"
+          git config user.email "50377048+Siemiany@users.noreply.github.com"
+          git add '*.html' .github/workflows/navigation-fix.yml
+          git commit -m "Fix navigation markup"
+          git push origin HEAD:navigation-cleanup
