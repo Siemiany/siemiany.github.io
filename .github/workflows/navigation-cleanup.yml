@@ -1,0 +1,87 @@
+name: Navigation cleanup
+
+on:
+  push:
+    branches:
+      - navigation-cleanup
+    paths:
+      - .github/workflows/navigation-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: navigation-cleanup
+      - name: Simplify global navigation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import re
+
+          new_menu = base64.b64decode("PGRpdiBjbGFzcz0ibmF2bGlua3MgbWVnYS1uYXYiPgo8ZGl2IGNsYXNzPSJuYXYtZ3JvdXAiPjxidXR0b24gYXJpYS1leHBhbmRlZD0iZmFsc2UiIGNsYXNzPSJuYXYtdHJpZ2dlciI+U2llbWlhbnkgPHNwYW4+4oyEPC9zcGFuPjwvYnV0dG9uPjxkaXYgY2xhc3M9Im1lZ2EtbWVudSBjb2xzLTIiPgo8ZGl2PjxwIGNsYXNzPSJtZWdhLWxhYmVsIj5NaWVqc2Nvd2/Fm8SHPC9wPjxhIGhyZWY9InNpZW1pYW55Lmh0bWwiPlByemV3b2RuaWsgcG8gU2llbWlhbmFjaDwvYT48YSBocmVmPSJoaXN0b3JpYS5odG1sIj5IaXN0b3JpYSBTaWVtaWFuPC9hPjwvZGl2Pgo8ZGl2PjxwIGNsYXNzPSJtZWdhLWxhYmVsIj5IaXN0b3JpZSBpIHPEhXNpZWR6aTwvcD48YSBocmVmPSJwYW4tc2Ftb2Nob2R6aWsuaHRtbCI+UGFuIFNhbW9jaG9kemlrPC9hPjxhIGhyZWY9Implcnp3YWxkLmh0bWwiPkplcnp3YcWCZDwvYT48YSBocmVmPSJzb2xuaWtpLmh0bWwiPlNvbG5pa2k8L2E+PC9kaXY+CjwvZGl2PjwvZGl2Pgo8ZGl2IGNsYXNzPSJuYXYtZ3JvdXAiPjxidXR0b24gYXJpYS1leHBhbmRlZD0iZmFsc2UiIGNsYXNzPSJuYXYtdHJpZ2dlciI+SmV6aW9yYSA8c3Bhbj7ijIQ8L3NwYW4+PC9idXR0b24+PGRpdiBjbGFzcz0ibWVnYS1tZW51IGNvbHMtMiI+CjxkaXY+PHAgY2xhc3M9Im1lZ2EtbGFiZWwiPkplemlvcmFrPC9wPjxhIGhyZWY9ImplemlvcmFrLmh0bWwiPkplemlvcmFrIC0gcHJ6ZXdvZG5pazwvYT48YSBocmVmPSJ3aWVsa2EtenVsYXdhLmh0bWwiPldpZWxrYSDFu3XFgmF3YTwvYT48L2Rpdj4KPGRpdj48cCBjbGFzcz0ibWVnYS1sYWJlbCI+SmV6aW9yYSBpIHJlemVyd2F0eTwvcD48YSBocmVmPSJqZXppb3JhLmh0bWwiPkplemlvcmEgaSByZXplcndhdHkgTGFzw7N3IEnFgmF3c2tpY2g8L2E+PC9kaXY+CjwvZGl2PjwvZGl2Pgo8ZGl2IGNsYXNzPSJuYXYtZ3JvdXAiPjxidXR0b24gYXJpYS1leHBhbmRlZD0iZmFsc2UiIGNsYXNzPSJuYXYtdHJpZ2dlciI+TmF0dXJhIGkgdHJhc3kgPHNwYW4+4oyEPC9zcGFuPjwvYnV0dG9uPjxkaXYgY2xhc3M9Im1lZ2EtbWVudSBjb2xzLTIiPgo8ZGl2PjxwIGNsYXNzPSJtZWdhLWxhYmVsIj5QaWVzem8gaSByb3dlcmVtPC9wPjxhIGhyZWY9Imxhc3ktdHJhc3kuaHRtbCI+TGFzeSBpIHNwYWNlcnk8L2E+PGEgaHJlZj0icm93ZXJlbS5odG1sIj5Sb3dlcmVtIHdva8OzxYIgSmV6aW9yYWthPC9hPjxhIGhyZWY9InNvbG5pa2kuaHRtbCI+UMSZdGxhIFNvbG5pa2k8L2E+PC9kaXY+CjxkaXY+PHAgY2xhc3M9Im1lZ2EtbGFiZWwiPlByenlyb2RhPC9wPjxhIGhyZWY9ImplemlvcmEuaHRtbCI+SmV6aW9yYSBpIHJlemVyd2F0eTwvYT48L2Rpdj4KPC9kaXY+PC9kaXY+CjxkaXYgY2xhc3M9Im5hdi1ncm91cCI+PGJ1dHRvbiBhcmlhLWV4cGFuZGVkPSJmYWxzZSIgY2xhc3M9Im5hdi10cmlnZ2VyIj5IaXN0b3JpYSBpIG9rb2xpY2EgPHNwYW4+4oyEPC9zcGFuPjwvYnV0dG9uPjxkaXYgY2xhc3M9Im1lZ2EtbWVudSBjb2xzLTIgbWVnYS13aWRlIj4KPGRpdj48cCBjbGFzcz0ibWVnYS1sYWJlbCI+SGlzdG9yaWU8L3A+PGEgaHJlZj0idGFqZW1uaWNlLmh0bWwiPlRhamVtbmljZSBva29saWN5PC9hPjxhIGhyZWY9ImphbnVzemV3by5odG1sIj5KYW51c3pld288L2E+PGEgaHJlZj0icGFuLXNhbW9jaG9kemlrLmh0bWwiPlBhbiBTYW1vY2hvZHppazwvL2E+PC9kaXY+CjxkaXY+PHAgY2xhc3M9Im1lZ2EtbGFiZWwiPlPEhXNpZWR6aSBpIHd5Y2llY3praTwvcD48YSBocmVmPSJqZXJ6d2FsZC5odG1sIj5KZXJ6d2FsZDwvYT48YSBocmVmPSJva29saWNhLmh0bWwiPk9rb2xpY2EgaSB3eWNpZWN6a2k8L2E+PC9kaXY+CjwvZGl2PjwvZGl2Pgo8YSBjbGFzcz0ibmF2LXNpbXBsZSIgaHJlZj0iZG9tZWsuaHRtbCI+RG9tZWs8L2E+CjxhIGNsYXNzPSJib29rIiBocmVmPSJodHRwczovL3d3dy5ib29raW5nLmNvbS9ob3RlbC9wbC9kb21lay1sZXRuaXNrb3d5LXNpZW1pYW55LnBsLmh0bWwiIHJlbD0ibm9vcGVuZXIiIHRhcmdldD0iX2JsYW5rIj5TcHJhd2TFuiB0ZXJtaW48L2E+CjwvZGl2Pg==").decode("utf-8")
+          pattern = re.compile(r'<div class="navlinks mega-nav">.*?</div></div></nav>', re.S)
+          changed = []
+
+          for path in Path(".").glob("*.html"):
+              text = path.read_text(encoding="utf-8")
+              if '<div class="navlinks mega-nav">' not in text:
+                  continue
+              updated, count = pattern.subn(new_menu + '</div></nav>', text, count=1)
+              if count != 1:
+                  raise SystemExit(f"Could not replace navigation in {path}")
+              updated = updated.replace('<aside class="article-nav">', '<aside aria-label="Na tej stronie" class="article-nav">')
+              if updated != text:
+                  path.write_text(updated, encoding="utf-8")
+                  changed.append(path.name)
+
+          if len(changed) < 10:
+              raise SystemExit(f"Unexpected number of updated HTML files: {len(changed)}")
+
+          css = Path("styles.css")
+          css_text = css.read_text(encoding="utf-8")
+          marker = "/* Navigation clarity: global menu = pages, article nav = sections */"
+          if marker not in css_text:
+              css_text += '\n\n' + marker + '\n.article-nav::before{content:"Na tej stronie";display:block;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--lake);font-weight:800;margin:0 0 9px}\n@media(max-width:900px){.article-nav::before{flex-basis:100%;width:100%;margin:0 0 2px}}\n'
+              css.write_text(css_text, encoding="utf-8")
+
+          print("Updated:", ", ".join(changed))
+          PY
+      - name: Validate navigation
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          files = []
+          for path in Path(".").glob("*.html"):
+              text = path.read_text(encoding="utf-8")
+              if '<div class="navlinks mega-nav">' not in text:
+                  continue
+              files.append(path.name)
+              match = re.search(r'<div class="navlinks mega-nav">(.*?)</div></div></nav>', text, re.S)
+              if not match:
+                  raise SystemExit(f"Navigation block missing in {path}")
+              if re.search(r'href="[^"]*#', match.group(1)):
+                  raise SystemExit(f"Anchor link remains in global navigation: {path}")
+
+          if not files:
+              raise SystemExit("No navigation files found")
+          print("Validated", len(files), "HTML files")
+          PY
+      - name: Commit navigation cleanup
+        shell: bash
+        run: |
+          rm .github/workflows/navigation-cleanup.yml
+          git config user.name "Siemiany"
+          git config user.email "50377048+Siemiany@users.noreply.github.com"
+          git add '*.html' styles.css .github/workflows/navigation-cleanup.yml
+          git commit -m "Simplify site navigation"
+          git push origin HEAD:navigation-cleanup
