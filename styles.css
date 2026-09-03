@@ -254,6 +254,7 @@ button{font:inherit}
 .mega-menu{display:none;position:absolute;top:calc(100% + 16px);left:50%;transform:translateX(-50%);min-width:520px;background:rgba(255,253,248,.98);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:0 22px 55px rgba(24,40,32,.16);z-index:120;gap:22px}
 .mega-menu:before{content:"";position:absolute;left:0;right:0;top:-18px;height:18px}
 .mega-menu.cols-2{grid-template-columns:repeat(2,minmax(190px,1fr))}
+.mega-menu.single{min-width:300px;grid-template-columns:1fr}
 .mega-menu.cols-3{grid-template-columns:repeat(3,minmax(170px,1fr));min-width:690px}
 .mega-menu.mega-wide{min-width:760px}
 .nav-group:hover>.mega-menu,.nav-group:focus-within>.mega-menu,.nav-group.open>.mega-menu{display:grid}
