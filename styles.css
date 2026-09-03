@@ -418,3 +418,5 @@ button{font:inherit}
 .castle-compare figure .mini{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lake);font-weight:800;margin-bottom:10px}
 .castle-compare figure img{height:360px;object-fit:cover;border-radius:22px}
 @media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}
+
+.nienacki-bio{display:grid;grid-template-columns:180px minmax(0,1fr);gap:26px;align-items:start;margin:18px 0 30px}.nienacki-bio .person-portrait{margin:0}.nienacki-bio .person-portrait img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center 18%;border-radius:16px}.nienacki-bio .intro{margin-top:0}.nienacki-bio figcaption{font-size:12px;line-height:1.45;color:var(--ink-soft);margin-top:8px}@media(max-width:640px){.nienacki-bio{grid-template-columns:120px minmax(0,1fr);gap:18px}.nienacki-bio .intro{font-size:1rem}}
