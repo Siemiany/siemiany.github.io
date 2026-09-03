@@ -1,3 +1,51 @@
+// Privacy-friendly analytics. Track only the production site; skip 404 and legacy redirect stubs.
+const analyticsExcludedPaths = new Set([
+  '/404.html',
+  '/galeria.html',
+  '/polozenie.html',
+  '/rezerwacja.html',
+  '/terminy.html',
+  '/wyposazenie.html'
+]);
+const isNotFoundPage = document.title === 'Nie znaleziono strony - siemiany.info';
+const analyticsEnabled =
+  location.protocol === 'https:' &&
+  location.hostname === 'siemiany.info' &&
+  !isNotFoundPage &&
+  !analyticsExcludedPaths.has(location.pathname);
+
+if (analyticsEnabled) {
+  const umamiScript = document.createElement('script');
+  umamiScript.defer = true;
+  umamiScript.src = 'https://cloud.umami.is/script.js';
+  umamiScript.dataset.websiteId = '71156e21-af68-4e4f-906e-1526f39437a5';
+  document.head.appendChild(umamiScript);
+}
+
+function trackUmami(eventName, data = {}) {
+  if (!analyticsEnabled || !window.umami?.track) return;
+  window.umami.track(eventName, data);
+}
+
+function analyticsPageName() {
+  const file = location.pathname.split('/').filter(Boolean).pop();
+  if (!file || /^index\.html$/i.test(file)) return 'home';
+  return file.replace(/\.html$/i, '');
+}
+
+function analyticsPlacement(element) {
+  if (element.closest('.mobile-bookbar')) return 'mobile_bookbar';
+  if (element.closest('nav')) return 'navigation';
+  if (element.closest('.hero, .page-hero')) return 'hero';
+  if (element.closest('footer')) return 'footer';
+  if (element.closest('.guide-cta, .stay-cta, .book-cta')) return 'article_cta';
+  return 'content';
+}
+
+function normalizedLinkLabel(link) {
+  return (link.textContent || link.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 100);
+}
+
 const menu = document.querySelector('.menu');
 const nav = document.querySelector('.navlinks');
 const body = document.body;
@@ -83,6 +131,11 @@ document.querySelectorAll('.video-facade[data-youtube]').forEach(box => {
   link.addEventListener('click', event => {
     if (!id || location.protocol === 'file:') return;
     event.preventDefault();
+    trackUmami('video_play', {
+      source_page: analyticsPageName(),
+      video_id: id,
+      title: title.slice(0, 100)
+    });
     const iframe = document.createElement('iframe');
     iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
     iframe.title = title;
@@ -135,3 +188,59 @@ function updateBookbar() {
 updateBookbar();
 addEventListener('scroll', updateBookbar, {passive:true});
 addEventListener('resize', updateBookbar);
+
+// Key navigation and conversion events. Event properties let Umami answer
+// which page and CTA placement generated a click without creating dozens of event names.
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[href]');
+  if (!link || !analyticsEnabled) return;
+
+  let url;
+  try { url = new URL(link.href, location.href); } catch (_error) { return; }
+
+  const sourcePage = analyticsPageName();
+  const placement = analyticsPlacement(link);
+  const label = normalizedLinkLabel(link);
+  const properties = {
+    source_page: sourcePage,
+    placement,
+    label
+  };
+
+  if (url.hostname === 'booking.com' || url.hostname.endsWith('.booking.com')) {
+    trackUmami('booking_click', properties);
+    return;
+  }
+
+  if (url.origin === location.origin && /\/domek\.html$/i.test(url.pathname) && sourcePage !== 'domek') {
+    trackUmami('guide_to_house_click', properties);
+    return;
+  }
+
+  if (/\.gpx(?:$|[?#])/i.test(url.pathname + url.search + url.hash)) {
+    trackUmami('gpx_download', { ...properties, destination: url.hostname || 'siemiany.info' });
+    return;
+  }
+
+  if (/komoot\./i.test(url.hostname)) {
+    trackUmami('route_open', { ...properties, destination: url.hostname });
+    return;
+  }
+
+  if (link.matches('[data-map], .map-link') || /maps\.google\.|google\.[^/]+\/maps|mapy\.cz/i.test(url.href)) {
+    trackUmami('map_open', { ...properties, destination: url.hostname });
+    return;
+  }
+
+  if (url.origin === location.origin && /\.html$/i.test(url.pathname) && !link.closest('nav')) {
+    trackUmami('related_content_click', {
+      ...properties,
+      destination_page: url.pathname.split('/').pop().replace(/\.html$/i, '')
+    });
+    return;
+  }
+
+  if (url.origin !== location.origin && !/youtube\.com|youtu\.be|youtube-nocookie\.com/i.test(url.hostname)) {
+    trackUmami('outbound_click', { ...properties, destination: url.hostname });
+  }
+});
