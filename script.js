@@ -1,246 +1,86 @@
-// Privacy-friendly analytics. Track only the production site; skip 404 and legacy redirect stubs.
-const analyticsExcludedPaths = new Set([
-  '/404.html',
-  '/galeria.html',
-  '/polozenie.html',
-  '/rezerwacja.html',
-  '/terminy.html',
-  '/wyposazenie.html'
-]);
-const isNotFoundPage = document.title === 'Nie znaleziono strony - siemiany.info';
-const analyticsEnabled =
-  location.protocol === 'https:' &&
-  location.hostname === 'siemiany.info' &&
-  !isNotFoundPage &&
-  !analyticsExcludedPaths.has(location.pathname);
+(() => {
+  const mainAlt = 'Jasny salon domku z kominkiem po remoncie';
 
-if (analyticsEnabled) {
-  const umamiScript = document.createElement('script');
-  umamiScript.defer = true;
-  umamiScript.src = 'https://cloud.umami.is/script.js';
-  umamiScript.dataset.websiteId = '71156e21-af68-4e4f-906e-1526f39437a5';
-  document.head.appendChild(umamiScript);
-}
-
-function trackUmami(eventName, data = {}) {
-  if (!analyticsEnabled || !window.umami?.track) return;
-  window.umami.track(eventName, data);
-}
-
-function analyticsPageName() {
-  const file = location.pathname.split('/').filter(Boolean).pop();
-  if (!file || /^index\.html$/i.test(file)) return 'home';
-  return file.replace(/\.html$/i, '');
-}
-
-function analyticsPlacement(element) {
-  if (element.closest('.mobile-bookbar')) return 'mobile_bookbar';
-  if (element.closest('nav')) return 'navigation';
-  if (element.closest('.hero, .page-hero')) return 'hero';
-  if (element.closest('footer')) return 'footer';
-  if (element.closest('.guide-cta, .stay-cta, .book-cta')) return 'article_cta';
-  return 'content';
-}
-
-function normalizedLinkLabel(link) {
-  return (link.textContent || link.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 100);
-}
-
-const menu = document.querySelector('.menu');
-const nav = document.querySelector('.navlinks');
-const body = document.body;
-
-if (menu && nav) {
-  menu.addEventListener('click', () => {
-    const open = nav.classList.toggle('open');
-    menu.setAttribute('aria-expanded', open ? 'true' : 'false');
-    body.classList.toggle('menu-open', open);
-    updateBookbar();
+  // taras.webp jest wspólnym zdjęciem domku w CTA na podstronach.
+  // Po podmianie pliku aktualizujemy również tekst alternatywny.
+  document.querySelectorAll('img[src="assets/img/taras.webp"]').forEach(image => {
+    if (!image.closest('.gallery')) image.alt = mainAlt;
   });
-}
 
-document.querySelectorAll('.nav-trigger').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (window.matchMedia('(max-width:1120px)').matches) {
-      const group = btn.closest('.nav-group');
-      const open = group.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  // Główne zdjęcie na stronie domku korzysta z taras-2.webp.
+  const houseHero = document.querySelector('.page-hero img[src="assets/img/taras-2.webp"]');
+  if (houseHero) houseHero.alt = mainAlt;
+
+  const gallery = document.querySelector('.gallery');
+  if (gallery) {
+    // Zachowujemy dotychczasowe zdjęcie tarasu w galerii, mimo że taras.webp
+    // staje się nowym zdjęciem głównym domku w pozostałych miejscach serwisu.
+    const originalTerraceLink = [...gallery.querySelectorAll('a[data-lightbox]')]
+      .find(link => link.getAttribute('href') === 'assets/img/taras.webp');
+
+    if (originalTerraceLink) {
+      originalTerraceLink.href = 'assets/img/taras-stary.webp';
+      const terraceImage = originalTerraceLink.querySelector('img');
+      if (terraceImage) {
+        terraceImage.src = 'assets/img/taras-stary.webp';
+        terraceImage.srcset = 'assets/img/r/taras-stary-800.webp 800w, assets/img/r/taras-stary-1200.webp 1200w, assets/img/taras-stary.webp 1800w';
+      }
     }
-  });
-});
 
-document.addEventListener('click', e => {
-  if (!e.target.closest('.nav-group') && window.matchMedia('(min-width:1121px)').matches) {
-    document.querySelectorAll('.nav-group.open').forEach(group => {
-      group.classList.remove('open');
-      group.querySelector('.nav-trigger')?.setAttribute('aria-expanded','false');
-    });
-  }
-});
+    if (!gallery.querySelector('[data-new-house-photo]')) {
+      const additions = [
+        {
+          className: 'gallery-wide',
+          src: 'assets/img/domek-glowne.webp',
+          alt: 'Jasny salon z kominkiem po remoncie',
+          width: 900,
+          height: 600,
+          sizes: '(max-width: 760px) 100vw, 66vw'
+        },
+        {
+          className: 'gallery-narrow',
+          src: 'assets/img/domek-wejscie.webp',
+          alt: 'Wejście do domku i zadaszony taras od strony ogrodu',
+          width: 480,
+          height: 320,
+          sizes: '(max-width: 760px) 100vw, 33vw'
+        },
+        {
+          className: 'gallery-full',
+          src: 'assets/img/domek-ogrod-2026.webp',
+          alt: 'Ogród i domek wśród zieleni',
+          width: 480,
+          height: 320,
+          sizes: '100vw'
+        }
+      ];
 
-// Accessible lightbox: ordinary image links remain usable if JavaScript is unavailable.
-const lightbox = document.querySelector('.lightbox');
-let lastLightboxTrigger = null;
-if (lightbox) {
-  const closeButton = lightbox.querySelector('button');
-  const lightboxImage = lightbox.querySelector('img');
-  const openLightbox = trigger => {
-    lastLightboxTrigger = trigger;
-    lightboxImage.src = trigger.href;
-    lightboxImage.alt = trigger.querySelector('img')?.alt || '';
-    lightbox.classList.add('open');
-    lightbox.setAttribute('aria-hidden','false');
-    body.classList.add('lightbox-open');
-    closeButton?.focus();
-    updateBookbar();
-  };
-  const closeLightbox = () => {
-    lightbox.classList.remove('open');
-    lightbox.setAttribute('aria-hidden','true');
-    body.classList.remove('lightbox-open');
-    lightboxImage.removeAttribute('src');
-    lastLightboxTrigger?.focus();
-    updateBookbar();
-  };
-  document.querySelectorAll('[data-lightbox]').forEach(link => {
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      openLightbox(link);
-    });
-  });
-  closeButton?.addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', event => {
-    if (event.target === lightbox) closeLightbox();
-  });
-  document.addEventListener('keydown', event => {
-    if (!lightbox.classList.contains('open')) return;
-    if (event.key === 'Escape') closeLightbox();
-    if (event.key === 'Tab') {
-      event.preventDefault();
-      closeButton?.focus();
+      additions.forEach(photo => {
+        const link = document.createElement('a');
+        link.className = photo.className;
+        link.dataset.lightbox = '';
+        link.dataset.newHousePhoto = '';
+        link.href = photo.src;
+
+        const image = document.createElement('img');
+        image.alt = photo.alt;
+        image.src = photo.src;
+        image.width = photo.width;
+        image.height = photo.height;
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.sizes = photo.sizes;
+
+        link.appendChild(image);
+        gallery.appendChild(link);
+      });
     }
-  });
-}
-
-// Progressive YouTube enhancement: the visible control is a normal link without JS.
-document.querySelectorAll('.video-facade[data-youtube]').forEach(box => {
-  const id = box.dataset.youtube;
-  const title = box.dataset.title || 'Film na YouTube';
-  const link = box.querySelector('[data-play]');
-  if (!link) return;
-  link.addEventListener('click', event => {
-    if (!id || location.protocol === 'file:') return;
-    event.preventDefault();
-    trackUmami('video_play', {
-      source_page: analyticsPageName(),
-      video_id: id,
-      title: title.slice(0, 100)
-    });
-    const iframe = document.createElement('iframe');
-    iframe.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(id) + '?autoplay=1&rel=0';
-    iframe.title = title;
-    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-    iframe.allowFullscreen = true;
-    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-    box.replaceChildren(iframe);
-    box.classList.add('playing');
-  });
-});
-
-// Leśne bingo.
-const natureQuest = document.querySelector('[data-nature-quest]');
-if (natureQuest) {
-  const storageKey = 'siemiany-nature-quest-v1';
-  const boxes = [...natureQuest.querySelectorAll('input[type="checkbox"]')];
-  const progress = natureQuest.querySelector('[data-quest-progress]');
-  const update = () => {
-    const completed = boxes.filter(box => box.checked).map(box => box.value);
-    if (progress) progress.textContent = `Odnalezione: ${completed.length}/${boxes.length}`;
-    try { localStorage.setItem(storageKey, JSON.stringify(completed)); } catch (_error) {}
-  };
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    boxes.forEach(box => { box.checked = saved.includes(box.value); });
-  } catch (_error) {}
-  boxes.forEach(box => box.addEventListener('change', update));
-  natureQuest.querySelector('[data-quest-reset]')?.addEventListener('click', () => {
-    boxes.forEach(box => { box.checked = false; });
-    update();
-  });
-  update();
-}
-
-// Mobile booking bar: appears only after the opening hero and never competes with menu/lightbox.
-const bar = document.querySelector('.mobile-bookbar');
-const hero = document.querySelector('.hero, .page-hero');
-function updateBookbar() {
-  if (!bar || window.innerWidth > 760) {
-    body.classList.remove('bookbar-active');
-    bar?.classList.remove('is-visible');
-    return;
-  }
-  const threshold = hero ? hero.offsetTop + Math.max(220, hero.offsetHeight - 120) : 420;
-  const blocked = body.classList.contains('menu-open') || body.classList.contains('lightbox-open');
-  const show = window.scrollY > threshold && !blocked;
-  bar.classList.toggle('is-visible', show);
-  body.classList.toggle('bookbar-active', show);
-}
-updateBookbar();
-addEventListener('scroll', updateBookbar, {passive:true});
-addEventListener('resize', updateBookbar);
-
-// Key navigation and conversion events. Event properties let Umami answer
-// which page and CTA placement generated a click without creating dozens of event names.
-document.addEventListener('click', event => {
-  const link = event.target.closest('a[href]');
-  if (!link || !analyticsEnabled) return;
-
-  let url;
-  try { url = new URL(link.href, location.href); } catch (_error) { return; }
-
-  const sourcePage = analyticsPageName();
-  const placement = analyticsPlacement(link);
-  const label = normalizedLinkLabel(link);
-  const properties = {
-    source_page: sourcePage,
-    placement,
-    label
-  };
-
-  if (url.hostname === 'booking.com' || url.hostname.endsWith('.booking.com')) {
-    trackUmami('booking_click', properties);
-    return;
   }
 
-  if (url.origin === location.origin && /\/domek\.html$/i.test(url.pathname) && sourcePage !== 'domek') {
-    trackUmami('guide_to_house_click', properties);
-    return;
-  }
-
-  if (/\.gpx(?:$|[?#])/i.test(url.pathname + url.search + url.hash)) {
-    trackUmami('gpx_download', { ...properties, destination: url.hostname || 'siemiany.info' });
-    return;
-  }
-
-  if (/komoot\./i.test(url.hostname)) {
-    trackUmami('route_open', { ...properties, destination: url.hostname });
-    return;
-  }
-
-  if (link.matches('[data-map], .map-link') || /maps\.google\.|google\.[^/]+\/maps|mapy\.cz/i.test(url.href)) {
-    trackUmami('map_open', { ...properties, destination: url.hostname });
-    return;
-  }
-
-  if (url.origin === location.origin && /\.html$/i.test(url.pathname) && !link.closest('nav')) {
-    trackUmami('related_content_click', {
-      ...properties,
-      destination_page: url.pathname.split('/').pop().replace(/\.html$/i, '')
-    });
-    return;
-  }
-
-  if (url.origin !== location.origin && !/youtube\.com|youtu\.be|youtube-nocookie\.com/i.test(url.hostname)) {
-    trackUmami('outbound_click', { ...properties, destination: url.hostname });
-  }
-});
+  // Zachowujemy całą dotychczasową logikę serwisu bez zmian.
+  // Ładujemy ją dopiero po przygotowaniu galerii, aby lightbox objął też nowe zdjęcia.
+  const legacyScript = document.createElement('script');
+  legacyScript.src = 'script-original.js';
+  legacyScript.async = false;
+  document.body.appendChild(legacyScript);
+})();
