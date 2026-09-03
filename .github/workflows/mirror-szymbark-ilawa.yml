@@ -1,0 +1,174 @@
+name: One-time mirror Szymbark and Ilawa images
+
+on:
+  push:
+    branches:
+      - fix/szymbark-ilawa-images
+    paths:
+      - .github/workflows/mirror-szymbark-ilawa.yml
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/szymbark-ilawa-images
+
+      - name: Download Szymbark images from Wikimedia Commons
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/img
+          curl -fL --retry 3 -A 'Mozilla/5.0' \
+            'https://commons.wikimedia.org/wiki/Special:Redirect/file/Schoenberg-Sammlung_Duncker_(5413840).jpg' \
+            -o assets/img/szymbark-zamek-1869-duncker.jpg
+          curl -fL --retry 3 -A 'Mozilla/5.0' \
+            'https://commons.wikimedia.org/wiki/Special:Redirect/file/Szymbark,_zamek,_pierzeja_wschodnia.jpg' \
+            -o assets/img/szymbark-zamek-ruiny.jpg
+
+      - name: Download exact Ilawa photo through its source page
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet selenium
+          python - <<'PY'
+          import base64
+          import time
+          from pathlib import Path
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+
+          article = 'https://www.traveligo.pl/blog/jezioro-jeziorak-najdluzszy-zbiornik-naturalny-w-polsce/'
+          wanted = 'Maly-Jeziorak-arch.-UM-Ilawa'
+
+          opts = Options()
+          opts.add_argument('--headless=new')
+          opts.add_argument('--no-sandbox')
+          opts.add_argument('--disable-dev-shm-usage')
+          opts.add_argument('--disable-gpu')
+          opts.add_argument('--window-size=1600,1200')
+
+          driver = webdriver.Chrome(options=opts)
+          try:
+              driver.get(article)
+              time.sleep(3)
+              candidates = []
+              for img in driver.find_elements('tag name', 'img'):
+                  for attr in ('currentSrc', 'src'):
+                      try:
+                          url = driver.execute_script(f'return arguments[0].{attr} || arguments[0].getAttribute("{attr}") || "";', img)
+                      except Exception:
+                          url = img.get_attribute(attr) or ''
+                      if wanted in url and url not in candidates:
+                          candidates.append(url)
+              if not candidates:
+                  candidates = [
+                      'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg',
+                      'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg',
+                  ]
+
+              script = r'''
+              const url = arguments[0], done = arguments[arguments.length - 1];
+              fetch(url, {credentials: 'include', referrer: location.href})
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+                .then(blob => {
+                  const fr = new FileReader();
+                  fr.onload = () => done(fr.result);
+                  fr.onerror = () => done('ERROR:file-reader');
+                  fr.readAsDataURL(blob);
+                })
+                .catch(e => done('ERROR:' + e.message));
+              '''
+              data_url = None
+              for url in candidates:
+                  result = driver.execute_async_script(script, url)
+                  print('candidate:', url, 'result:', str(result)[:40])
+                  if isinstance(result, str) and result.startswith('data:image/'):
+                      data_url = result
+                      break
+              if not data_url:
+                  raise SystemExit('Could not fetch the selected Ilawa image in a same-origin browser session')
+              payload = data_url.split(',', 1)[1]
+              data = base64.b64decode(payload)
+              if not data.startswith(b'\xff\xd8\xff'):
+                  raise SystemExit(f'Expected JPEG, got {data[:12]!r}')
+              Path('assets/img/ilawa-maly-jeziorak-um.jpg').write_bytes(data)
+              print('saved exact Ilawa image:', len(data), 'bytes')
+          finally:
+              driver.quit()
+          PY
+
+      - name: Update site pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          traveligo = 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg'
+
+          # Iława page: all uses become local, including OG with an absolute site URL.
+          p = Path('ilawa.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
+          s = s.replace('content="assets/img/ilawa-maly-jeziorak-um.jpg" property="og:image"',
+                        'content="https://siemiany.info/assets/img/ilawa-maly-jeziorak-um.jpg" property="og:image"')
+          p.write_text(s, encoding='utf-8')
+
+          # Iława tile on the surroundings page.
+          p = Path('okolica.html')
+          s = p.read_text(encoding='utf-8').replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
+          p.write_text(s, encoding='utf-8')
+
+          # Szymbark: present the requested historical/current pair instead of one generic ruin photo.
+          p = Path('tajemnice.html')
+          s = p.read_text(encoding='utf-8')
+          old = '<figure class="place-photo"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Zamek%20w%20Szymbarku%20PJS10.JPG?width=1800"/><figcaption>Zamek w Szymbarku - fot. Piotr Salata (Pjsalata), CC BY-SA 3.0 PL, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Zamek_w_Szymbarku_PJS10.JPG" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure>'
+          new = '<div class="then-now castle-compare"><figure class="place-photo"><span class="mini">Kiedyś · ok. 1869–1870</span><img alt="Zamek w Szymbarku około 1869–1870 roku na litografii Alexandra Dunckera" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-1869-duncker.jpg"/><figcaption>Zamek w Szymbarku przed zniszczeniem · Alexander Duncker, ok. 1869–1870 · Polona / Wikimedia Commons · domena publiczna. <a href="https://commons.wikimedia.org/wiki/File:Schoenberg-Sammlung_Duncker_(5413840).jpg" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure><figure class="place-photo"><span class="mini">Dziś</span><img alt="Dzisiejsze ruiny zamku w Szymbarku, pierzeja wschodnia" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-ruiny.jpg"/><figcaption>Ruiny zamku w Szymbarku, pierzeja wschodnia · fot. 1bumer, CC BY-SA 4.0, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Szymbark,_zamek,_pierzeja_wschodnia.jpg" rel="noopener" target="_blank">Źródło i licencja ↗</a></figcaption></figure></div>'
+          if old not in s:
+              raise SystemExit('Expected existing Szymbark figure not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+
+          # Dedicated layout for the image comparison.
+          p = Path('styles.css')
+          s = p.read_text(encoding='utf-8')
+          css = '''\n.castle-compare{align-items:start}\n.castle-compare figure{margin:0}\n.castle-compare figure .mini{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lake);font-weight:800;margin-bottom:10px}\n.castle-compare figure img{height:360px;object-fit:cover;border-radius:22px}\n@media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}\n'''
+          if '.castle-compare{' not in s:
+              s += css
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify local image files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          for f in [
+              'assets/img/ilawa-maly-jeziorak-um.jpg',
+              'assets/img/szymbark-zamek-1869-duncker.jpg',
+              'assets/img/szymbark-zamek-ruiny.jpg',
+          ]:
+              data = Path(f).read_bytes()
+              assert data.startswith(b'\xff\xd8\xff'), f'{f}: not a JPEG'
+              assert len(data) > 50_000, f'{f}: suspiciously small'
+              print(f, len(data))
+          PY
+
+      - name: Commit mirrored assets and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'siemiany-site-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/mirror-szymbark-ilawa.yml
+          git add assets/img/ilawa-maly-jeziorak-um.jpg \
+                  assets/img/szymbark-zamek-1869-duncker.jpg \
+                  assets/img/szymbark-zamek-ruiny.jpg \
+                  ilawa.html okolica.html tajemnice.html styles.css
+          git commit -m 'Fix Iława image and add Szymbark then-now photos'
+          git push origin HEAD:fix/szymbark-ilawa-images
