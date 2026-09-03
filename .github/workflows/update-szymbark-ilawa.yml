@@ -1,0 +1,79 @@
+name: One-time update Szymbark and Ilawa images
+on:
+  push:
+    branches: [fix/restore-ilawa-jeziorak-hero-and-copy]
+jobs:
+  update:
+    if: github.event.head_commit.message == 'Add one-time workflow for Szymbark and Ilawa images'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/restore-ilawa-jeziorak-hero-and-copy
+      - name: Download local image copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/img
+          curl -fL --retry 3 -A 'Mozilla/5.0' 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Schoenberg-Sammlung_Duncker_(5413840).jpg' -o assets/img/szymbark-zamek-1869-duncker.jpg
+          curl -fL --retry 3 -A 'Mozilla/5.0' 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Szymbark,_zamek,_pierzeja_wschodnia.jpg' -o assets/img/szymbark-zamek-ruiny.jpg
+          curl -fL --retry 3 -A 'Mozilla/5.0' -e 'https://www.traveligo.pl/' 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg' -o assets/img/ilawa-maly-jeziorak-um.jpg
+          python - <<'PY'
+          from pathlib import Path
+          for f in [
+              'assets/img/szymbark-zamek-1869-duncker.jpg',
+              'assets/img/szymbark-zamek-ruiny.jpg',
+              'assets/img/ilawa-maly-jeziorak-um.jpg',
+          ]:
+              data=Path(f).read_bytes()
+              if not data.startswith(b'\xff\xd8\xff'):
+                  raise SystemExit(f'{f} is not a JPEG')
+              print(f, len(data))
+          PY
+      - name: Update pages
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          traveligo='https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg'
+
+          p=Path('ilawa.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
+          s=s.replace('content="assets/img/ilawa-maly-jeziorak-um.jpg" property="og:image"', 'content="https://siemiany.info/assets/img/ilawa-maly-jeziorak-um.jpg" property="og:image"')
+          p.write_text(s, encoding='utf-8')
+
+          p=Path('okolica.html')
+          s=p.read_text(encoding='utf-8').replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
+          p.write_text(s, encoding='utf-8')
+
+          p=Path('tajemnice.html')
+          s=p.read_text(encoding='utf-8')
+          old='<figure class="place-photo"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Zamek%20w%20Szymbarku%20PJS10.JPG?width=1800"/><figcaption>Zamek w Szymbarku - fot. Piotr Salata (Pjsalata), CC BY-SA 3.0 PL, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Zamek_w_Szymbarku_PJS10.JPG" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure>'
+          new='<div class="then-now castle-compare"><figure class="place-photo"><span class="mini">Kiedyś · ok. 1869–1870</span><img alt="Zamek w Szymbarku około 1869–1870 roku na litografii Alexandra Dunckera" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-1869-duncker.jpg"/><figcaption>Zamek w Szymbarku przed zniszczeniem · Alexander Duncker, ok. 1869–1870 · Polona / Wikimedia Commons · domena publiczna. <a href="https://commons.wikimedia.org/wiki/File:Schoenberg-Sammlung_Duncker_(5413840).jpg" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure><figure class="place-photo"><span class="mini">Dziś</span><img alt="Dzisiejsze ruiny zamku w Szymbarku, pierzeja wschodnia" decoding="async" loading="lazy" src="assets/img/szymbark-zamek-ruiny.jpg"/><figcaption>Ruiny zamku w Szymbarku, pierzeja wschodnia · fot. 1bumer, CC BY-SA 4.0, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Szymbark,_zamek,_pierzeja_wschodnia.jpg" rel="noopener" target="_blank">Źródło i licencja ↗</a></figcaption></figure></div>'
+          if old not in s:
+              raise SystemExit('Expected Szymbark figure not found')
+          p.write_text(s.replace(old,new), encoding='utf-8')
+
+          p=Path('styles.css')
+          s=p.read_text(encoding='utf-8')
+          marker='/* V12 */'
+          addition='.castle-compare{align-items:start}\n.castle-compare figure{margin:0}\n.castle-compare figure .mini{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lake);font-weight:800;margin-bottom:10px}\n.castle-compare figure img{height:360px;object-fit:cover;border-radius:22px}\n@media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}\n\n'
+          if '.castle-compare{' not in s:
+              if marker not in s:
+                  raise SystemExit('CSS marker not found')
+              s=s.replace(marker, addition+marker, 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/update-szymbark-ilawa.yml
+          git config user.name 'siemiany-site-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git commit -m 'Use local Ilawa photo and add Szymbark then-now images'
+          git push origin HEAD:fix/restore-ilawa-jeziorak-hero-and-copy
