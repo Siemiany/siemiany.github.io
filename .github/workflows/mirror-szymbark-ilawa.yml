@@ -30,76 +30,95 @@ jobs:
             'https://commons.wikimedia.org/wiki/Special:Redirect/file/Szymbark,_zamek,_pierzeja_wschodnia.jpg' \
             -o assets/img/szymbark-zamek-ruiny.jpg
 
-      - name: Download exact Ilawa photo through its source page
+      - name: Download exact Ilawa photo through a cache/CDN
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --quiet selenium
+          python -m pip install --quiet pillow
           python - <<'PY'
-          import base64
-          import time
+          import html
+          import json
+          import re
+          import subprocess
+          import urllib.parse
           from pathlib import Path
-          from selenium import webdriver
-          from selenium.webdriver.chrome.options import Options
+          from PIL import Image
 
-          article = 'https://www.traveligo.pl/blog/jezioro-jeziorak-najdluzszy-zbiornik-naturalny-w-polsce/'
-          wanted = 'Maly-Jeziorak-arch.-UM-Ilawa'
+          out = Path('assets/img/ilawa-maly-jeziorak-um.jpg')
+          original = 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg'
+          encoded = urllib.parse.quote(original, safe='')
+          candidates = [
+              f'https://i0.wp.com/www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg?ssl=1',
+              f'https://i1.wp.com/www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg?ssl=1',
+              f'https://i2.wp.com/www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg?ssl=1',
+              f'https://wsrv.nl/?url={encoded}&output=jpg&q=92',
+              f'https://images.weserv.nl/?url={encoded}&output=jpg&q=92',
+              f'https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?url={encoded}&container=focus&refresh=2592000',
+          ]
 
-          opts = Options()
-          opts.add_argument('--headless=new')
-          opts.add_argument('--no-sandbox')
-          opts.add_argument('--disable-dev-shm-usage')
-          opts.add_argument('--disable-gpu')
-          opts.add_argument('--window-size=1600,1200')
+          def valid(path):
+              try:
+                  with Image.open(path) as im:
+                      im.load()
+                      w, h = im.size
+                      print('image:', w, 'x', h, im.format)
+                      if w < 600 or h < 350:
+                          return False
+                      if im.format != 'JPEG':
+                          rgb = im.convert('RGB')
+                          rgb.save(out, 'JPEG', quality=92)
+                      return True
+              except Exception as e:
+                  print('invalid:', e)
+                  return False
 
-          driver = webdriver.Chrome(options=opts)
-          try:
-              driver.get(article)
-              time.sleep(3)
-              candidates = []
-              for img in driver.find_elements('tag name', 'img'):
-                  for attr in ('currentSrc', 'src'):
-                      try:
-                          url = driver.execute_script(f'return arguments[0].{attr} || arguments[0].getAttribute("{attr}") || "";', img)
-                      except Exception:
-                          url = img.get_attribute(attr) or ''
-                      if wanted in url and url not in candidates:
-                          candidates.append(url)
-              if not candidates:
-                  candidates = [
-                      'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-scaled.jpg',
-                      'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg',
-                  ]
+          def fetch(url):
+              print('trying:', url)
+              tmp = Path('/tmp/ilawa-candidate')
+              tmp.unlink(missing_ok=True)
+              cp = subprocess.run([
+                  'curl','-fL','--retry','2','--connect-timeout','15','--max-time','60',
+                  '-A','Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Safari/537.36',
+                  '-o',str(tmp),url
+              ])
+              if cp.returncode == 0 and tmp.exists() and valid(tmp):
+                  if tmp != out:
+                      with Image.open(tmp) as im:
+                          im.convert('RGB').save(out, 'JPEG', quality=92)
+                  return True
+              return False
 
-              script = r'''
-              const url = arguments[0], done = arguments[arguments.length - 1];
-              fetch(url, {credentials: 'include', referrer: location.href})
-                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
-                .then(blob => {
-                  const fr = new FileReader();
-                  fr.onload = () => done(fr.result);
-                  fr.onerror = () => done('ERROR:file-reader');
-                  fr.readAsDataURL(blob);
-                })
-                .catch(e => done('ERROR:' + e.message));
-              '''
-              data_url = None
-              for url in candidates:
-                  result = driver.execute_async_script(script, url)
-                  print('candidate:', url, 'result:', str(result)[:40])
-                  if isinstance(result, str) and result.startswith('data:image/'):
-                      data_url = result
+          ok = any(fetch(u) for u in candidates)
+
+          if not ok:
+              # Last fallback: Bing's cached thumbnail for the exact source filename.
+              query = urllib.parse.quote('"Maly-Jeziorak-arch.-UM-Ilawa" Traveligo')
+              page = subprocess.check_output([
+                  'curl','-fL','--retry','2','-A','Mozilla/5.0',
+                  f'https://www.bing.com/images/search?q={query}&form=HDRSC3'
+              ], text=True, errors='ignore')
+              urls = []
+              for m in re.finditer(r'm=\"(\{.*?\})\"', page):
+                  try:
+                      obj = json.loads(html.unescape(m.group(1)))
+                  except Exception:
+                      continue
+                  if 'traveligo' in (obj.get('murl','') + obj.get('purl','')).lower() and obj.get('turl'):
+                      urls.append(obj['turl'])
+              for u in urls:
+                  # Ask Bing for a larger cached rendition when query params permit it.
+                  parsed = urllib.parse.urlsplit(u)
+                  qs = urllib.parse.parse_qs(parsed.query)
+                  qs['w'] = ['1400']
+                  qs['h'] = ['1000']
+                  bigger = urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path, urllib.parse.urlencode(qs, doseq=True), parsed.fragment))
+                  if fetch(bigger) or fetch(u):
+                      ok = True
                       break
-              if not data_url:
-                  raise SystemExit('Could not fetch the selected Ilawa image in a same-origin browser session')
-              payload = data_url.split(',', 1)[1]
-              data = base64.b64decode(payload)
-              if not data.startswith(b'\xff\xd8\xff'):
-                  raise SystemExit(f'Expected JPEG, got {data[:12]!r}')
-              Path('assets/img/ilawa-maly-jeziorak-um.jpg').write_bytes(data)
-              print('saved exact Ilawa image:', len(data), 'bytes')
-          finally:
-              driver.quit()
+
+          if not ok:
+              raise SystemExit('Could not obtain the exact selected Iława photo from source caches')
+          print('saved:', out, out.stat().st_size)
           PY
 
       - name: Update site pages
@@ -111,7 +130,6 @@ jobs:
 
           traveligo = 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg'
 
-          # Iława page: all uses become local, including OG with an absolute site URL.
           p = Path('ilawa.html')
           s = p.read_text(encoding='utf-8')
           s = s.replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
@@ -119,12 +137,10 @@ jobs:
                         'content="https://siemiany.info/assets/img/ilawa-maly-jeziorak-um.jpg" property="og:image"')
           p.write_text(s, encoding='utf-8')
 
-          # Iława tile on the surroundings page.
           p = Path('okolica.html')
           s = p.read_text(encoding='utf-8').replace(traveligo, 'assets/img/ilawa-maly-jeziorak-um.jpg')
           p.write_text(s, encoding='utf-8')
 
-          # Szymbark: present the requested historical/current pair instead of one generic ruin photo.
           p = Path('tajemnice.html')
           s = p.read_text(encoding='utf-8')
           old = '<figure class="place-photo"><img alt="Ruiny zamku w Szymbarku" decoding="async" loading="lazy" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Zamek%20w%20Szymbarku%20PJS10.JPG?width=1800"/><figcaption>Zamek w Szymbarku - fot. Piotr Salata (Pjsalata), CC BY-SA 3.0 PL, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Zamek_w_Szymbarku_PJS10.JPG" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure>'
@@ -133,7 +149,6 @@ jobs:
               raise SystemExit('Expected existing Szymbark figure not found')
           p.write_text(s.replace(old, new, 1), encoding='utf-8')
 
-          # Dedicated layout for the image comparison.
           p = Path('styles.css')
           s = p.read_text(encoding='utf-8')
           css = '''\n.castle-compare{align-items:start}\n.castle-compare figure{margin:0}\n.castle-compare figure .mini{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lake);font-weight:800;margin-bottom:10px}\n.castle-compare figure img{height:360px;object-fit:cover;border-radius:22px}\n@media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}\n'''
@@ -148,15 +163,16 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          from PIL import Image
           for f in [
               'assets/img/ilawa-maly-jeziorak-um.jpg',
               'assets/img/szymbark-zamek-1869-duncker.jpg',
               'assets/img/szymbark-zamek-ruiny.jpg',
           ]:
-              data = Path(f).read_bytes()
-              assert data.startswith(b'\xff\xd8\xff'), f'{f}: not a JPEG'
-              assert len(data) > 50_000, f'{f}: suspiciously small'
-              print(f, len(data))
+              with Image.open(f) as im:
+                  im.verify()
+              assert Path(f).stat().st_size > 50_000, f'{f}: suspiciously small'
+              print(f, Path(f).stat().st_size)
           PY
 
       - name: Commit mirrored assets and remove one-time workflow
