@@ -1,0 +1,53 @@
+name: One-time update Nienacki photo
+
+on:
+  push:
+    branches:
+      - fix/restore-ilawa-jeziorak-hero-and-copy
+    paths:
+      - .github/workflows/update-nienacki-photo.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/restore-ilawa-jeziorak-hero-and-copy
+      - name: Replace Nienacki house photo and attribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('pan-samochodzik.html')
+          s = p.read_text(encoding='utf-8')
+
+          old_og = 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Dom_Zbigniewa_Nienackiego_1.jpg?width=1600'
+          new_og = 'https://siemiany.info/assets/img/dom-nienackiego-nienacki-art.jpg'
+          if old_og not in s:
+              raise SystemExit('Expected old og:image not found')
+          s = s.replace(old_og, new_og, 1)
+
+          old_figure = '<figure class="page-hero-figure"><img alt="Dom Zbigniewa Nienackiego w Jerzwałdzie" fetchpriority="high" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Dom_Zbigniewa_Nienackiego_1.jpg?width=1600"/><figcaption>Dom Zbigniewa Nienackiego w Jerzwałdzie - fot. Anamix, CC BY-SA 3.0, Wikimedia Commons. <a href="https://commons.wikimedia.org/wiki/File:Dom_Zbigniewa_Nienackiego_1.jpg" rel="noopener" target="_blank">Źródło ↗</a></figcaption></figure>'
+          new_figure = '<figure class="page-hero-figure"><img alt="Dom Zbigniewa Nienackiego w Jerzwałdzie" fetchpriority="high" src="assets/img/dom-nienackiego-nienacki-art.jpg"/><figcaption>Dom Zbigniewa Nienackiego w Jerzwałdzie. Zdjęcie pochodzi z nieistniejącej już strony nienacki.art.pl.</figcaption></figure>'
+          if old_figure not in s:
+              raise SystemExit('Expected old hero figure not found')
+          s = s.replace(old_figure, new_figure, 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit update and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'siemiany-site-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add pan-samochodzik.html
+          git rm .github/workflows/update-nienacki-photo.yml
+          git commit -m 'Use archived Nienacki house photo locally'
+          git push origin HEAD:fix/restore-ilawa-jeziorak-hero-and-copy
