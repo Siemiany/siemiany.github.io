@@ -1,4 +1,4 @@
-// Privacy-friendly analytics. Skip 404 and legacy redirect stubs.
+// Privacy-friendly analytics. Track only the production site; skip 404 and legacy redirect stubs.
 const analyticsExcludedPaths = new Set([
   '/404.html',
   '/galeria.html',
@@ -7,7 +7,12 @@ const analyticsExcludedPaths = new Set([
   '/terminy.html',
   '/wyposazenie.html'
 ]);
-const analyticsEnabled = location.protocol !== 'file:' && !analyticsExcludedPaths.has(location.pathname);
+const isNotFoundPage = document.title === 'Nie znaleziono strony - siemiany.info';
+const analyticsEnabled =
+  location.protocol === 'https:' &&
+  location.hostname === 'siemiany.info' &&
+  !isNotFoundPage &&
+  !analyticsExcludedPaths.has(location.pathname);
 
 if (analyticsEnabled) {
   const umamiScript = document.createElement('script');
@@ -23,8 +28,9 @@ function trackUmami(eventName, data = {}) {
 }
 
 function analyticsPageName() {
-  const file = location.pathname.split('/').filter(Boolean).pop() || 'home';
-  return file.replace(/\.html$/i, '') || 'home';
+  const file = location.pathname.split('/').filter(Boolean).pop();
+  if (!file || /^index\.html$/i.test(file)) return 'home';
+  return file.replace(/\.html$/i, '');
 }
 
 function analyticsPlacement(element) {
@@ -201,7 +207,7 @@ document.addEventListener('click', event => {
     label
   };
 
-  if (/booking\.com$/i.test(url.hostname) || /\.booking\.com$/i.test(url.hostname)) {
+  if (url.hostname === 'booking.com' || url.hostname.endsWith('.booking.com')) {
     trackUmami('booking_click', properties);
     return;
   }
