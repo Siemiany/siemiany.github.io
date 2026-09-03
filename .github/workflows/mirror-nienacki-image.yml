@@ -1,0 +1,41 @@
+name: One-time mirror Nienacki image
+
+on:
+  push:
+    branches:
+      - fix/restore-ilawa-jeziorak-hero-and-copy
+    paths:
+      - .github/workflows/mirror-nienacki-image.yml
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/restore-ilawa-jeziorak-hero-and-copy
+      - name: Download requested photo
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/img
+          curl --fail --location --retry 3 --retry-delay 2 \
+            --user-agent 'Mozilla/5.0' \
+            --referer 'https://www.infoilawa.pl/aktualnosci/item/70577-dom-zbigniewa-nienackiego-w-jerzwaldzie-wystawiony-na-sprzedaz-znamy-cene-zobacz-zdjecia' \
+            'https://infoilawa.pl/img/wysiwig/2023styczen/kwiecien/54534.jpg' \
+            --output assets/img/dom-nienackiego-nienacki-art.jpg
+          test -s assets/img/dom-nienackiego-nienacki-art.jpg
+          file assets/img/dom-nienackiego-nienacki-art.jpg
+      - name: Commit mirrored image and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'siemiany-site-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add assets/img/dom-nienackiego-nienacki-art.jpg
+          git rm .github/workflows/mirror-nienacki-image.yml
+          git commit -m 'Mirror Nienacki house photo locally'
+          git push origin HEAD:fix/restore-ilawa-jeziorak-hero-and-copy
