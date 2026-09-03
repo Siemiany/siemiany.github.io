@@ -4,7 +4,7 @@ on:
     branches: [fix/restore-ilawa-jeziorak-hero-and-copy]
 jobs:
   update:
-    if: github.event.head_commit.message == 'Trigger Szymbark and Ilawa image update'
+    if: github.event.head_commit.message == 'Retry Szymbark and Ilawa image update'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,7 +19,9 @@ jobs:
           mkdir -p assets/img
           curl -fL --retry 3 -A 'Mozilla/5.0' 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Schoenberg-Sammlung_Duncker_(5413840).jpg' -o assets/img/szymbark-zamek-1869-duncker.jpg
           curl -fL --retry 3 -A 'Mozilla/5.0' 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Szymbark,_zamek,_pierzeja_wschodnia.jpg' -o assets/img/szymbark-zamek-ruiny.jpg
-          curl -fL --retry 3 -A 'Mozilla/5.0' -e 'https://www.traveligo.pl/' 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg' -o assets/img/ilawa-maly-jeziorak-um.jpg
+          if ! curl -fL --retry 2 -A 'Mozilla/5.0' -e 'https://www.traveligo.pl/' 'https://www.traveligo.pl/blog/wp-content/uploads/2020/10/Maly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg' -o assets/img/ilawa-maly-jeziorak-um.jpg; then
+            curl -fL --retry 3 -A 'Mozilla/5.0' 'https://images.weserv.nl/?url=https%3A%2F%2Fwww.traveligo.pl%2Fblog%2Fwp-content%2Fuploads%2F2020%2F10%2FMaly-Jeziorak-arch.-UM-Ilawa-2048x1369.jpg&output=jpg' -o assets/img/ilawa-maly-jeziorak-um.jpg
+          fi
           python - <<'PY'
           from pathlib import Path
           for f in [
