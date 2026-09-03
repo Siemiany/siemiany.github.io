@@ -420,3 +420,5 @@ button{font:inherit}
 @media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}
 
 .nienacki-bio{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:28px;align-items:start;margin:18px 0 30px}.nienacki-bio-copy{min-width:0}.nienacki-bio .intro{margin-top:0}.nienacki-bio .nienacki-portrait{margin:0;width:150px;max-width:150px}.nienacki-bio .nienacki-portrait img{display:block;width:150px;height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center;border-radius:14px}.nienacki-bio .nienacki-portrait figcaption{font-size:11px;line-height:1.4;color:var(--ink-soft);margin-top:7px}@media(max-width:640px){.nienacki-bio{grid-template-columns:1fr;gap:14px}.nienacki-bio .nienacki-portrait{width:130px;max-width:130px}.nienacki-bio .nienacki-portrait img{width:130px}.nienacki-bio .intro{font-size:1rem}}
+
+.archive-video{position:relative;width:100%;aspect-ratio:16/9;margin:24px 0 10px;overflow:hidden;border-radius:18px;background:#17221e}.archive-video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.article .media-note{font-size:13px;color:var(--ink-soft);margin-top:8px}
