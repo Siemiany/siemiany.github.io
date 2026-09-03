@@ -34,9 +34,7 @@ jobs:
           text = text.replace(old_nav, new_nav, 1)
 
           marker = '<p>Najlepsze krótkie wyjścia nie wymagają planowania. Jeśli masz więcej czasu, warto połączyć je z Urowcem, Jasnym albo fragmentem trasy Solniki.</p></section>\n<section id="solniki">'
-          section = '''<p>Najlepsze krótkie wyjścia nie wymagają planowania. Jeśli masz więcej czasu, warto połączyć je z Urowcem, Jasnym albo fragmentem trasy Solniki.</p></section>
-<section id="mapa-turystyczna"><p class="kicker">Do planowania własnych tras</p><h2>Mapa turystyczna Nadleśnictwa Susz</h2><p>Jeśli chcesz samodzielnie układać spacery i wycieczki po Lasach Iławskich, przydaje się szczegółowa mapa turystyczna Nadleśnictwa Susz. To wygodny punkt odniesienia do planowania leśnych wariantów wokół Siemian i dalszych wyjść w teren.</p><a class="place-link" href="''' + map_href + '''" rel="noopener" target="_blank"><strong>Otwórz mapę turystyczną PDF ↗</strong><span>Mapa Nadleśnictwa Susz · PDF · około 22 MB</span></a></section>
-<section id="solniki">'''
+          section = '<p>Najlepsze krótkie wyjścia nie wymagają planowania. Jeśli masz więcej czasu, warto połączyć je z Urowcem, Jasnym albo fragmentem trasy Solniki.</p></section>\n<section id="mapa-turystyczna"><p class="kicker">Do planowania własnych tras</p><h2>Mapa turystyczna Nadleśnictwa Susz</h2><p>Jeśli chcesz samodzielnie układać spacery i wycieczki po Lasach Iławskich, przydaje się szczegółowa mapa turystyczna Nadleśnictwa Susz. To wygodny punkt odniesienia do planowania leśnych wariantów wokół Siemian i dalszych wyjść w teren.</p><a class="place-link" href="' + map_href + '" rel="noopener" target="_blank"><strong>Otwórz mapę turystyczną PDF ↗</strong><span>Mapa Nadleśnictwa Susz · PDF · około 22 MB</span></a></section>\n<section id="solniki">'
           if marker not in text:
               raise SystemExit('Nie znaleziono miejsca na sekcję mapy w lasy-trasy.html')
           text = text.replace(marker, section, 1)
