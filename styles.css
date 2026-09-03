@@ -412,3 +412,9 @@ button{font:inherit}
 /* Navigation clarity: global menu = pages, article nav = sections */
 .article-nav::before{content:"Na tej stronie";display:block;font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--lake);font-weight:800;margin:0 0 9px}
 @media(max-width:900px){.article-nav::before{flex-basis:100%;width:100%;margin:0 0 2px}}
+
+.castle-compare{align-items:start}
+.castle-compare figure{margin:0}
+.castle-compare figure .mini{display:block;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--lake);font-weight:800;margin-bottom:10px}
+.castle-compare figure img{height:360px;object-fit:cover;border-radius:22px}
+@media(max-width:760px){.castle-compare{grid-template-columns:1fr}.castle-compare figure img{height:auto}}
