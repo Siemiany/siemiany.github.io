@@ -1,20 +1,31 @@
 (() => {
+  const mainSrc = 'assets/img/zdjecie-glowne.jpeg';
   const mainAlt = 'Jasny salon domku z kominkiem po remoncie';
 
-  // taras.webp jest wspólnym zdjęciem domku w CTA na podstronach.
-  // Po podmianie pliku aktualizujemy również tekst alternatywny.
+  // To samo, pełnej jakości zdjęcie salonu jest głównym zdjęciem domku
+  // w CTA na podstronach oraz w hero strony domku.
   document.querySelectorAll('img[src="assets/img/taras.webp"]').forEach(image => {
-    if (!image.closest('.gallery')) image.alt = mainAlt;
+    if (!image.closest('.gallery')) {
+      image.src = mainSrc;
+      image.removeAttribute('srcset');
+      image.alt = mainAlt;
+      image.width = 1536;
+      image.height = 1024;
+    }
   });
 
-  // Główne zdjęcie na stronie domku korzysta z taras-2.webp.
   const houseHero = document.querySelector('.page-hero img[src="assets/img/taras-2.webp"]');
-  if (houseHero) houseHero.alt = mainAlt;
+  if (houseHero) {
+    houseHero.src = mainSrc;
+    houseHero.removeAttribute('srcset');
+    houseHero.alt = mainAlt;
+    houseHero.width = 1536;
+    houseHero.height = 1024;
+  }
 
   const gallery = document.querySelector('.gallery');
   if (gallery) {
-    // Zachowujemy dotychczasowe zdjęcie tarasu w galerii, mimo że taras.webp
-    // staje się nowym zdjęciem głównym domku w pozostałych miejscach serwisu.
+    // Zachowujemy dotychczasowe zdjęcie tarasu w galerii.
     const originalTerraceLink = [...gallery.querySelectorAll('a[data-lightbox]')]
       .find(link => link.getAttribute('href') === 'assets/img/taras.webp');
 
@@ -31,26 +42,26 @@
       const additions = [
         {
           className: 'gallery-wide',
-          src: 'assets/img/domek-glowne.webp',
+          src: mainSrc,
           alt: 'Jasny salon z kominkiem po remoncie',
-          width: 2048,
-          height: 1366,
+          width: 1536,
+          height: 1024,
           sizes: '(max-width: 760px) 100vw, 66vw'
         },
         {
           className: 'gallery-narrow',
-          src: 'assets/img/domek-wejscie.webp',
-          alt: 'Wejście do domku i zadaszony taras od strony ogrodu',
-          width: 1800,
-          height: 1200,
+          src: 'assets/img/domek-bok.jpeg',
+          alt: 'Domek od boku, z wejściem i zadaszonym tarasem',
+          width: 1536,
+          height: 1024,
           sizes: '(max-width: 760px) 100vw, 33vw'
         },
         {
           className: 'gallery-full',
-          src: 'assets/img/domek-ogrod-2026.webp',
-          alt: 'Ogród i domek wśród zieleni',
-          width: 2048,
-          height: 1365,
+          src: 'assets/img/domek-tyl.jpeg',
+          alt: 'Domek od strony ogrodu wśród zieleni',
+          width: 1536,
+          height: 1024,
           sizes: '100vw'
         }
       ];
@@ -76,12 +87,30 @@
       });
     }
 
-    // .gallery-full miało 430 px wysokości przy 340-pikselowym wierszu grida.
-    // Gdy pełny kafel przestał być ostatni, wystawał na następny wiersz i kasował odstęp.
-    // Dopasowanie go do wysokości wiersza zachowuje równy gap na desktopie i mobile.
+    // Pełnoszeroki kafel nie może wystawać poza wysokość wiersza grida,
+    // bo wtedy znika odstęp przed kolejnym zdjęciem.
     gallery.querySelectorAll('.gallery-full').forEach(link => {
       link.style.height = '100%';
     });
+  }
+
+  // Wielka Żuława: używamy zdjęcia UM dodanego do repo zamiast starego hero.
+  if (window.location.pathname.endsWith('wielka-zulawa.html')) {
+    const zulawaHero = document.querySelector('.page-hero-figure img');
+    if (zulawaHero) {
+      zulawaHero.src = 'assets/img/WielkaZulawa-UM-Iława.jpg';
+      zulawaHero.removeAttribute('srcset');
+      zulawaHero.alt = 'Wielka Żuława na Jezioraku widziana z powietrza';
+    }
+
+    const zulawaCaption = document.querySelector('.page-hero-figure figcaption');
+    if (zulawaCaption) zulawaCaption.textContent = 'UM';
+
+    const zulawaCredit = document.querySelector('#dzis .external-credit');
+    if (zulawaCredit) zulawaCredit.textContent = 'Zdjęcie główne: UM.';
+
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/WielkaZulawa-UM-Iława.jpg';
   }
 
   // Zachowujemy całą dotychczasową logikę serwisu bez zmian.
