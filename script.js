@@ -108,6 +108,24 @@
     });
   }
 
+  // Na stronach stricte redakcyjnych domek jest tylko dyskretnym przypomnieniem,
+  // a nie drugim dużym blokiem sprzedażowym po artykule.
+  const editorialStayPages = new Set([
+    'bialy-chlop.html',
+    'januszewo.html',
+    'tajemnice.html',
+    'pan-samochodzik.html',
+    'wielka-zulawa.html'
+  ]);
+  const currentPage = window.location.pathname.split('/').pop();
+  if (editorialStayPages.has(currentPage)) {
+    const stayCta = document.querySelector('.guide-stay-cta');
+    if (stayCta) {
+      stayCta.className = 'section compact';
+      stayCta.innerHTML = '<div class="wrap"><a class="place-link" href="domek.html"><strong>Chcesz poznawać tę okolicę z Siemian? →</strong><span>Nasz domek stoi 200 m od Jezioraka i 100 m od lasu. Pełny opis, zdjęcia i wyposażenie są na stronie domku.</span></a></div>';
+    }
+  }
+
   // Wielka Żuława: używamy zdjęcia UM dodanego do repo zamiast starego hero.
   if (window.location.pathname.endsWith('wielka-zulawa.html')) {
     const zulawaHero = document.querySelector('.page-hero-figure img');
