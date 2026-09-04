@@ -23,6 +23,20 @@
     houseHero.height = 1024;
   }
 
+  // Sekcja „Wygodnie po całym dniu nad wodą i w lesie.” ma pokazywać sypialnię,
+  // bo lepiej wspiera komunikat o wygodzie i dobrych materacach po remoncie.
+  // Zdjęcie sypialni w galerii pozostaje bez zmian.
+  if (window.location.pathname.endsWith('domek.html')) {
+    const comfortImage = document.querySelector('.split.reverse .visual img[src="assets/img/lazienka.webp"]');
+    if (comfortImage) {
+      comfortImage.src = 'assets/img/sypialnia.webp';
+      comfortImage.srcset = 'assets/img/r/sypialnia-800.webp 800w, assets/img/r/sypialnia-1200.webp 1200w, assets/img/sypialnia.webp 1800w';
+      comfortImage.alt = 'Sypialnia dwuosobowa z wygodnym łóżkiem po remoncie';
+      comfortImage.width = 1800;
+      comfortImage.height = 1208;
+    }
+  }
+
   const gallery = document.querySelector('.gallery');
   if (gallery) {
     // Zachowujemy dotychczasowe zdjęcie tarasu w galerii.
