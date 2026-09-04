@@ -33,24 +33,24 @@
           className: 'gallery-wide',
           src: 'assets/img/domek-glowne.webp',
           alt: 'Jasny salon z kominkiem po remoncie',
-          width: 900,
-          height: 600,
+          width: 2048,
+          height: 1366,
           sizes: '(max-width: 760px) 100vw, 66vw'
         },
         {
           className: 'gallery-narrow',
           src: 'assets/img/domek-wejscie.webp',
           alt: 'Wejście do domku i zadaszony taras od strony ogrodu',
-          width: 480,
-          height: 320,
+          width: 1800,
+          height: 1200,
           sizes: '(max-width: 760px) 100vw, 33vw'
         },
         {
           className: 'gallery-full',
           src: 'assets/img/domek-ogrod-2026.webp',
           alt: 'Ogród i domek wśród zieleni',
-          width: 480,
-          height: 320,
+          width: 2048,
+          height: 1365,
           sizes: '100vw'
         }
       ];
@@ -75,6 +75,13 @@
         gallery.appendChild(link);
       });
     }
+
+    // .gallery-full miało 430 px wysokości przy 340-pikselowym wierszu grida.
+    // Gdy pełny kafel przestał być ostatni, wystawał na następny wiersz i kasował odstęp.
+    // Dopasowanie go do wysokości wiersza zachowuje równy gap na desktopie i mobile.
+    gallery.querySelectorAll('.gallery-full').forEach(link => {
+      link.style.height = '100%';
+    });
   }
 
   // Zachowujemy całą dotychczasową logikę serwisu bez zmian.
