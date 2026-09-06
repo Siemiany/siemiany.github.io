@@ -194,6 +194,20 @@
     }
   }
 
+  // Strona główna: nowe własne zdjęcie Jezioraka zastępuje dotychczasowe ujęcie trzcin
+  // w kaflu „Jeziorak” pod nagłówkiem „Jedno duże jezioro. Dziesiątki małych odkryć.”.
+  if (currentPage === '' || currentPage === 'index.html') {
+    const jeziorakCardImage = document.querySelector('.card-grid .card[href="jeziorak.html"] img');
+    if (jeziorakCardImage) {
+      jeziorakCardImage.src = '5C028B18-CEAA-4AAB-9A93-CCB20CBC3E73.png';
+      jeziorakCardImage.removeAttribute('srcset');
+      jeziorakCardImage.removeAttribute('sizes');
+      jeziorakCardImage.removeAttribute('width');
+      jeziorakCardImage.removeAttribute('height');
+      jeziorakCardImage.alt = 'Jeziorak w Siemianach';
+    }
+  }
+
   // Siemiany: pokazujemy własne zdjęcia bezpośrednio przy polecanych lokalach.
   if (currentPage === 'siemiany.html') {
     const addRestaurantPhoto = (card, src, alt, caption) => {
