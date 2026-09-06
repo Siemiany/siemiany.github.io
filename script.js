@@ -120,7 +120,6 @@
   const currentPage = window.location.pathname.split('/').pop();
 
   // Siemiany: pokazujemy własne zdjęcia bezpośrednio przy polecanych lokalach.
-  // Pliki są małe i ładowane leniwie, więc nie obciążają wejścia na stronę.
   if (currentPage === 'siemiany.html') {
     const addRestaurantPhoto = (card, src, alt, caption) => {
       if (!card || card.querySelector('[data-restaurant-photo]')) return;
@@ -136,8 +135,8 @@
       const image = document.createElement('img');
       image.src = src;
       image.alt = alt;
-      image.width = 400;
-      image.height = 300;
+      image.width = 1536;
+      image.height = 1024;
       image.loading = 'lazy';
       image.decoding = 'async';
 
@@ -152,7 +151,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Szopa');
     addRestaurantPhoto(
       szopaCard,
-      'assets/img/szopa-siemiany.webp',
+      'assets/img/B4825D86-09A7-4643-9B57-598410EC5210.png',
       'Szopa w Siemianach - ogródek restauracyjny',
       'Szopa w Siemianach - zdjęcie własne'
     );
@@ -161,7 +160,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Bar na Skarpie');
     addRestaurantPhoto(
       skarpieCard,
-      'assets/img/bar-na-skarpie-siemiany.webp',
+      'assets/img/A75B004D-9A11-43A9-8B8D-3CAE549080F6.png',
       'Bar na Skarpie w Siemianach - taras z widokiem na Jeziorak',
       'Bar na Skarpie - widok na Jeziorak, zdjęcie własne'
     );
