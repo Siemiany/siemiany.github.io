@@ -119,6 +119,81 @@
   ]);
   const currentPage = window.location.pathname.split('/').pop();
 
+  // Susz: wykorzystujemy własne zdjęcia plaży i dużego placu zabaw dodane do repo.
+  const suszPlaygroundSrc = 'assets/img/9CE80E4D-E41C-4C7D-83CD-77EBFA4B1AF6.png';
+  const suszBeachSrc = 'assets/img/A7D37753-C878-4B94-9B4F-D1396AAEBA37.png';
+
+  if (currentPage === 'susz.html') {
+    const suszSection = document.querySelector('#susz');
+    const firstPhoto = suszSection?.querySelector('figure.place-photo');
+
+    if (firstPhoto) {
+      const image = firstPhoto.querySelector('img');
+      if (image) {
+        image.src = suszBeachSrc;
+        image.removeAttribute('srcset');
+        image.removeAttribute('sizes');
+        image.alt = 'Plaża miejska nad Jeziorem Suskim';
+        image.width = 1536;
+        image.height = 1024;
+      }
+
+      const caption = firstPhoto.querySelector('figcaption');
+      if (caption) caption.textContent = 'Plaża miejska nad Jeziorem Suskim — zdjęcie własne.';
+
+      if (!suszSection.querySelector('[data-susz-family-feature]')) {
+        const familyFeature = document.createElement('div');
+        familyFeature.className = 'event-feature';
+        familyFeature.dataset.suszFamilyFeature = '';
+        familyFeature.innerHTML = `
+          <div>
+            <p class="kicker">Z dzieckiem</p>
+            <h3>Plaża i duży plac zabaw</h3>
+            <p>To właśnie dlatego Susz jest jednym z naszych najprostszych pomysłów na rodzinne pół dnia z Siemian. Kąpielisko, duży plac zabaw i promenada są blisko siebie, więc nie trzeba budować skomplikowanego planu ani dużo jeździć po mieście.</p>
+            <p>Najlepiej połączyć zabawę i plażę ze spacerem nad Jeziorem Suskim, a później zostać w Suszu na obiad.</p>
+          </div>
+          <figure class="place-photo" style="margin:0">
+            <img alt="Duży plac zabaw przy plaży w Suszu" decoding="async" height="1024" loading="lazy" src="${suszPlaygroundSrc}" width="1536"/>
+            <figcaption>Duży plac zabaw przy plaży w Suszu — zdjęcie własne.</figcaption>
+          </figure>`;
+        firstPhoto.insertAdjacentElement('afterend', familyFeature);
+      }
+    }
+  }
+
+  // Strona główna: wizualnie wzmacniamy rodzinne polecenie „Plaża + Warmianka”.
+  if (currentPage === '' || currentPage === 'index.html') {
+    const suszRecommendation = [...document.querySelectorAll('.recommend.light-card')]
+      .find(card => card.querySelector('h3')?.textContent.trim() === 'Plaża + Warmianka');
+
+    if (suszRecommendation && !suszRecommendation.querySelector('[data-susz-home-photo]')) {
+      const heading = suszRecommendation.querySelector('h3');
+      const image = document.createElement('img');
+      image.dataset.suszHomePhoto = '';
+      image.src = suszPlaygroundSrc;
+      image.alt = 'Duży plac zabaw przy plaży w Suszu';
+      image.width = 1536;
+      image.height = 1024;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+      image.style.cssText = 'width:100%;height:240px;object-fit:cover;border-radius:16px;margin:16px 0 18px';
+      heading?.insertAdjacentElement('afterend', image);
+    }
+  }
+
+  // Okolica: kafel Susza pokazuje konkretnie plażę, o której mówi jego opis.
+  if (currentPage === 'okolica.html') {
+    const suszTripImage = document.querySelector('.trip#susz img');
+    if (suszTripImage) {
+      suszTripImage.src = suszBeachSrc;
+      suszTripImage.removeAttribute('srcset');
+      suszTripImage.removeAttribute('sizes');
+      suszTripImage.alt = 'Plaża miejska nad Jeziorem Suskim';
+      suszTripImage.width = 1536;
+      suszTripImage.height = 1024;
+    }
+  }
+
   // Siemiany: pokazujemy własne zdjęcia bezpośrednio przy polecanych lokalach.
   if (currentPage === 'siemiany.html') {
     const addRestaurantPhoto = (card, src, alt, caption) => {
