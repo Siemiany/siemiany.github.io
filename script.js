@@ -118,6 +118,54 @@
     'wielka-zulawa.html'
   ]);
   const currentPage = window.location.pathname.split('/').pop();
+
+  // Siemiany: pokazujemy własne zdjęcia bezpośrednio przy polecanych lokalach.
+  if (currentPage === 'siemiany.html') {
+    const addRestaurantPhoto = (card, src, alt, caption) => {
+      if (!card || card.querySelector('[data-restaurant-photo]')) return;
+
+      const heading = card.querySelector('h3');
+      if (!heading) return;
+
+      const figure = document.createElement('figure');
+      figure.className = 'place-photo';
+      figure.dataset.restaurantPhoto = '';
+      figure.style.margin = '18px 0 20px';
+
+      const image = document.createElement('img');
+      image.src = src;
+      image.alt = alt;
+      image.width = 1536;
+      image.height = 1024;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+
+      const figcaption = document.createElement('figcaption');
+      figcaption.textContent = caption;
+
+      figure.append(image, figcaption);
+      heading.insertAdjacentElement('afterend', figure);
+    };
+
+    const szopaCard = [...document.querySelectorAll('#jedzenie .recommend')]
+      .find(card => card.querySelector('h3')?.textContent.trim() === 'Szopa');
+    addRestaurantPhoto(
+      szopaCard,
+      'assets/img/B4825D86-09A7-4643-9B57-598410EC5210.png',
+      'Szopa w Siemianach - ogródek restauracyjny',
+      'Szopa w Siemianach - zdjęcie własne'
+    );
+
+    const skarpieCard = [...document.querySelectorAll('#jedzenie .eatery-grid .info-card')]
+      .find(card => card.querySelector('h3')?.textContent.trim() === 'Bar na Skarpie');
+    addRestaurantPhoto(
+      skarpieCard,
+      'assets/img/A75B004D-9A11-43A9-8B8D-3CAE549080F6.png',
+      'Bar na Skarpie w Siemianach - taras z widokiem na Jeziorak',
+      'Bar na Skarpie - widok na Jeziorak, zdjęcie własne'
+    );
+  }
+
   if (editorialStayPages.has(currentPage)) {
     const stayCta = document.querySelector('.guide-stay-cta');
     if (stayCta) {
