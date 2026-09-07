@@ -1,5 +1,5 @@
 (() => {
-  const mainSrc = 'assets/img/zdjecie-glowne.jpeg';
+  const mainSrc = 'assets/img/domek-salon-glowne.jpeg';
   const mainAlt = 'Jasny salon domku z kominkiem po remoncie';
 
   // To samo, pełnej jakości zdjęcie salonu jest głównym zdjęciem domku
@@ -120,8 +120,8 @@
   const currentPage = window.location.pathname.split('/').pop();
 
   // Susz: wykorzystujemy własne zdjęcia plaży i dużego placu zabaw dodane do repo.
-  const suszPlaygroundSrc = 'assets/img/9CE80E4D-E41C-4C7D-83CD-77EBFA4B1AF6.png';
-  const suszBeachSrc = 'assets/img/A7D37753-C878-4B94-9B4F-D1396AAEBA37.png';
+  const suszPlaygroundSrc = 'assets/img/susz-plac-zabaw.png';
+  const suszBeachSrc = 'assets/img/susz-plaza-miejska.png';
 
   if (currentPage === 'susz.html') {
     const suszSection = document.querySelector('#susz');
@@ -199,7 +199,7 @@
   if (currentPage === '' || currentPage === 'index.html') {
     const jeziorakCardImage = document.querySelector('.card-grid .card[href="jeziorak.html"] img');
     if (jeziorakCardImage) {
-      jeziorakCardImage.src = '5C028B18-CEAA-4AAB-9A93-CCB20CBC3E73.png';
+      jeziorakCardImage.src = 'assets/img/jeziorak-siemiany.png';
       jeziorakCardImage.removeAttribute('srcset');
       jeziorakCardImage.removeAttribute('sizes');
       jeziorakCardImage.removeAttribute('width');
@@ -240,7 +240,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Szopa');
     addRestaurantPhoto(
       szopaCard,
-      'assets/img/B4825D86-09A7-4643-9B57-598410EC5210.png',
+      'assets/img/siemiany-szopa.png',
       'Szopa w Siemianach - ogródek restauracyjny',
       'Szopa w Siemianach - zdjęcie własne'
     );
@@ -249,7 +249,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Bar na Skarpie');
     addRestaurantPhoto(
       skarpieCard,
-      'assets/img/A75B004D-9A11-43A9-8B8D-3CAE549080F6.png',
+      'assets/img/siemiany-bar-na-skarpie.png',
       'Bar na Skarpie w Siemianach - taras z widokiem na Jeziorak',
       'Bar na Skarpie - widok na Jeziorak, zdjęcie własne'
     );
@@ -267,7 +267,7 @@
   if (window.location.pathname.endsWith('wielka-zulawa.html')) {
     const zulawaHero = document.querySelector('.page-hero-figure img');
     if (zulawaHero) {
-      zulawaHero.src = 'assets/img/WielkaZulawa-UM-Iława.jpg';
+      zulawaHero.src = 'assets/img/wielka-zulawa-um-ilawa.jpg';
       zulawaHero.removeAttribute('srcset');
       zulawaHero.alt = 'Wielka Żuława na Jezioraku widziana z powietrza';
     }
@@ -279,7 +279,7 @@
     if (zulawaCredit) zulawaCredit.textContent = 'Zdjęcie główne: UM.';
 
     const ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/WielkaZulawa-UM-Iława.jpg';
+    if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/wielka-zulawa-um-ilawa.jpg';
   }
 
   // Zachowujemy całą dotychczasową logikę serwisu bez zmian.
