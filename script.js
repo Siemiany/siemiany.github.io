@@ -207,7 +207,7 @@ function applyResponsivePhotos(root = document) {
       }
 
       const caption = firstPhoto.querySelector('figcaption');
-      if (caption) caption.textContent = 'Plaża miejska nad Jeziorem Suskim — zdjęcie własne.';
+      if (caption) caption.textContent = 'Plaża miejska nad Jeziorem Suskim - zdjęcie własne.';
 
       if (!suszSection.querySelector('[data-susz-family-feature]')) {
         const familyFeature = document.createElement('div');
@@ -222,7 +222,7 @@ function applyResponsivePhotos(root = document) {
           </div>
           <figure class="place-photo" style="margin:0">
             <img alt="Duży plac zabaw przy plaży w Suszu" decoding="async" height="1024" loading="lazy" src="${suszPlaygroundSrc}" width="1536"/>
-            <figcaption>Duży plac zabaw przy plaży w Suszu — zdjęcie własne.</figcaption>
+            <figcaption>Duży plac zabaw przy plaży w Suszu - zdjęcie własne.</figcaption>
           </figure>`;
         firstPhoto.insertAdjacentElement('afterend', familyFeature);
       }
