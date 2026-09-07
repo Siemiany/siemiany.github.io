@@ -255,11 +255,11 @@ if (analyticsPageName() === 'jeziorak') {
     photoBlock.style.margin = '28px 0 44px';
     photoBlock.innerHTML = `
       <figure class="place-photo">
-        <img alt="Naturalny brzeg Jezioraka w okolicy Siemian" decoding="async" height="1024" loading="lazy" src="BE1F13FA-E708-4556-864E-E773607D8D16.png" width="1536"/>
+        <img alt="Naturalny brzeg Jezioraka w okolicy Siemian" decoding="async" height="1024" loading="lazy" src="assets/img/jeziorak-brzeg-siemiany.png" width="1536"/>
         <figcaption>Jeziorak od brzegu — zdjęcie własne.</figcaption>
       </figure>
       <figure class="place-photo">
-        <img alt="Drzewa nad brzegiem Jezioraka w okolicy Siemian" decoding="async" height="1024" loading="lazy" src="C4A6653C-3FDB-45DF-9EF3-B57A0A4F821A.png" width="1536"/>
+        <img alt="Drzewa nad brzegiem Jezioraka w okolicy Siemian" decoding="async" height="1024" loading="lazy" src="assets/img/jeziorak-lesny-brzeg-siemiany.png" width="1536"/>
         <figcaption>Leśny brzeg Jezioraka — zdjęcie własne.</figcaption>
       </figure>`;
     characterSection.insertAdjacentElement('afterend', photoBlock);
