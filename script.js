@@ -1,3 +1,57 @@
+// Responsive variants for the current photo set. Originals remain available as source files.
+const responsivePhotos = {
+  "assets/img/jeziorak-siemiany.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/jeziorak-siemiany-480.webp 480w, assets/img/r/jeziorak-siemiany-800.webp 800w, assets/img/r/jeziorak-siemiany-1200.webp 1200w, assets/img/jeziorak-siemiany.webp 1448w"
+  },
+  "assets/img/jeziorak-brzeg-siemiany.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/jeziorak-brzeg-siemiany-480.webp 480w, assets/img/r/jeziorak-brzeg-siemiany-800.webp 800w, assets/img/r/jeziorak-brzeg-siemiany-1200.webp 1200w, assets/img/jeziorak-brzeg-siemiany.webp 1448w"
+  },
+  "assets/img/jeziorak-lesny-brzeg-siemiany.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/jeziorak-lesny-brzeg-siemiany-480.webp 480w, assets/img/r/jeziorak-lesny-brzeg-siemiany-800.webp 800w, assets/img/r/jeziorak-lesny-brzeg-siemiany-1200.webp 1200w, assets/img/jeziorak-lesny-brzeg-siemiany.webp 1448w"
+  },
+  "assets/img/siemiany-szopa.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/siemiany-szopa-480.webp 480w, assets/img/r/siemiany-szopa-800.webp 800w, assets/img/r/siemiany-szopa-1200.webp 1200w, assets/img/siemiany-szopa.webp 1448w"
+  },
+  "assets/img/siemiany-bar-na-skarpie.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/siemiany-bar-na-skarpie-480.webp 480w, assets/img/r/siemiany-bar-na-skarpie-800.webp 800w, assets/img/r/siemiany-bar-na-skarpie-1200.webp 1200w, assets/img/siemiany-bar-na-skarpie.webp 1448w"
+  },
+  "assets/img/susz-plac-zabaw.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/susz-plac-zabaw-480.webp 480w, assets/img/r/susz-plac-zabaw-800.webp 800w, assets/img/r/susz-plac-zabaw-1200.webp 1200w, assets/img/susz-plac-zabaw.webp 1448w"
+  },
+  "assets/img/susz-plaza-miejska.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/susz-plaza-miejska-480.webp 480w, assets/img/r/susz-plaza-miejska-800.webp 800w, assets/img/r/susz-plaza-miejska-1200.webp 1200w, assets/img/susz-plaza-miejska.webp 1448w"
+  },
+  "assets/img/wielka-zulawa-um-ilawa.webp": {
+    "width": 1800,
+    "height": 1200,
+    "srcset": "assets/img/r/wielka-zulawa-um-ilawa-480.webp 480w, assets/img/r/wielka-zulawa-um-ilawa-800.webp 800w, assets/img/r/wielka-zulawa-um-ilawa-1200.webp 1200w, assets/img/wielka-zulawa-um-ilawa.webp 1800w"
+  }
+};
+function applyResponsivePhotos(root = document) {
+  root.querySelectorAll("img[src]").forEach(image => {
+    const photo = responsivePhotos[image.getAttribute("src")];
+    if (!photo) return;
+    image.srcset = photo.srcset;
+    image.sizes = "(max-width: 980px) 100vw, 50vw";
+    image.width = photo.width;
+    image.height = photo.height;
+  });
+}
+
 (() => {
   const mainSrc = 'assets/img/domek-salon-glowne.jpeg';
   const mainAlt = 'Jasny salon domku z kominkiem po remoncie';
@@ -134,8 +188,8 @@
   }
 
   // Susz: wykorzystujemy własne zdjęcia plaży i dużego placu zabaw dodane do repo.
-  const suszPlaygroundSrc = 'assets/img/susz-plac-zabaw.png';
-  const suszBeachSrc = 'assets/img/susz-plaza-miejska.png';
+  const suszPlaygroundSrc = 'assets/img/susz-plac-zabaw.webp';
+  const suszBeachSrc = 'assets/img/susz-plaza-miejska.webp';
 
   if (currentPage === 'susz.html') {
     const suszSection = document.querySelector('#susz');
@@ -213,7 +267,7 @@
   if (currentPage === '' || currentPage === 'index.html') {
     const jeziorakCardImage = document.querySelector('.card-grid .card[href="jeziorak.html"] img');
     if (jeziorakCardImage) {
-      jeziorakCardImage.src = 'assets/img/jeziorak-siemiany.png';
+      jeziorakCardImage.src = 'assets/img/jeziorak-siemiany.webp';
       jeziorakCardImage.removeAttribute('srcset');
       jeziorakCardImage.removeAttribute('sizes');
       jeziorakCardImage.removeAttribute('width');
@@ -254,7 +308,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Szopa');
     addRestaurantPhoto(
       szopaCard,
-      'assets/img/siemiany-szopa.png',
+      'assets/img/siemiany-szopa.webp',
       'Szopa w Siemianach - ogródek restauracyjny',
       'Szopa w Siemianach - zdjęcie własne'
     );
@@ -263,7 +317,7 @@
       .find(card => card.querySelector('h3')?.textContent.trim() === 'Bar na Skarpie');
     addRestaurantPhoto(
       skarpieCard,
-      'assets/img/siemiany-bar-na-skarpie.png',
+      'assets/img/siemiany-bar-na-skarpie.webp',
       'Bar na Skarpie w Siemianach - taras z widokiem na Jeziorak',
       'Bar na Skarpie - widok na Jeziorak, zdjęcie własne'
     );
@@ -281,7 +335,7 @@
   if (window.location.pathname.endsWith('wielka-zulawa.html')) {
     const zulawaHero = document.querySelector('.page-hero-figure img');
     if (zulawaHero) {
-      zulawaHero.src = 'assets/img/wielka-zulawa-um-ilawa.jpg';
+      zulawaHero.src = 'assets/img/wielka-zulawa-um-ilawa.webp';
       zulawaHero.removeAttribute('srcset');
       zulawaHero.alt = 'Wielka Żuława na Jezioraku widziana z powietrza';
     }
@@ -293,8 +347,10 @@
     if (zulawaCredit) zulawaCredit.textContent = 'Zdjęcie główne: UM.';
 
     const ogImage = document.querySelector('meta[property="og:image"]');
-    if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/wielka-zulawa-um-ilawa.jpg';
+    if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/wielka-zulawa-um-ilawa.webp';
   }
+
+  applyResponsivePhotos();
 
   // Zachowujemy całą dotychczasową logikę serwisu bez zmian.
   // Ładujemy ją dopiero po przygotowaniu galerii, aby lightbox objął też nowe zdjęcia.
