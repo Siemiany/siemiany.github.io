@@ -119,6 +119,20 @@
   ]);
   const currentPage = window.location.pathname.split('/').pop();
 
+  // Aktualna ocena Booking.com dla Zacisza Siemiany (sprawdzone 7.09.2026).
+  if (currentPage === 'domek.html') {
+    const bookingLabel = [...document.querySelectorAll('.trust-strip .mini')]
+      .find(label => label.textContent.trim() === 'Booking.com');
+    const bookingCard = bookingLabel?.parentElement;
+    if (bookingCard) {
+      const rating = bookingCard.querySelector('strong');
+      const details = [...bookingCard.querySelectorAll(':scope > span')]
+        .find(span => !span.classList.contains('mini'));
+      if (rating) rating.textContent = '9,4 / 10';
+      if (details) details.textContent = '15 opinii · stan 7.09.2026';
+    }
+  }
+
   // Susz: wykorzystujemy własne zdjęcia plaży i dużego placu zabaw dodane do repo.
   const suszPlaygroundSrc = 'assets/img/susz-plac-zabaw.png';
   const suszBeachSrc = 'assets/img/susz-plaza-miejska.png';
