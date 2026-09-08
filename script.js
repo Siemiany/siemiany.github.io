@@ -341,13 +341,108 @@ function applyResponsivePhotos(root = document) {
     }
 
     const zulawaCaption = document.querySelector('.page-hero-figure figcaption');
-    if (zulawaCaption) zulawaCaption.textContent = 'UM';
+    if (zulawaCaption) zulawaCaption.innerHTML = 'Wielka Żuława na Jezioraku widziana z powietrza — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.';
 
     const zulawaCredit = document.querySelector('#dzis .external-credit');
-    if (zulawaCredit) zulawaCredit.textContent = 'Zdjęcie główne: UM.';
+    if (zulawaCredit) zulawaCredit.innerHTML = 'Zdjęcie główne: Wielka Żuława na Jezioraku widziana z powietrza — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.';
 
     const ogImage = document.querySelector('meta[property="og:image"]');
     if (ogImage) ogImage.content = 'https://siemiany.info/assets/img/wielka-zulawa-um-ilawa.webp';
+  }
+
+  // Ujednolicamy podpisy zdjęć zewnętrznych na wszystkich podstronach.
+  const setFigureCaption = (figure, html) => {
+    if (!figure) return;
+    let caption = figure.querySelector('figcaption');
+    if (!caption) {
+      caption = document.createElement('figcaption');
+      figure.appendChild(caption);
+    }
+    caption.innerHTML = html;
+  };
+
+  const addTripCredit = (id, html) => {
+    const body = document.querySelector(`.trip#${id} .body`);
+    if (!body || body.querySelector('[data-image-credit]')) return;
+    const credit = document.createElement('div');
+    credit.className = 'external-credit';
+    credit.dataset.imageCredit = '';
+    credit.innerHTML = html;
+    body.prepend(credit);
+  };
+
+  if (currentPage === 'ilawa.html') {
+    const heroGrid = document.querySelector('.page-hero .page-hero-grid');
+    const heroImage = heroGrid ? [...heroGrid.children].find(element =>
+      element.tagName === 'IMG' && element.getAttribute('src') === 'assets/img/ilawa-maly-jeziorak-um.jpg'
+    ) : null;
+    if (heroImage) {
+      const figure = document.createElement('figure');
+      figure.className = 'page-hero-figure';
+      heroImage.replaceWith(figure);
+      figure.appendChild(heroImage);
+      setFigureCaption(figure, 'Mały Jeziorak w Iławie — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.');
+    }
+    const ilawaCaption = document.querySelector('#ilawa figure.place-photo figcaption');
+    if (ilawaCaption) ilawaCaption.innerHTML = 'Mały Jeziorak w Iławie — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.';
+  }
+
+  if (currentPage === 'okolica.html') {
+    addTripCredit('ilawa', 'Zdjęcie: Mały Jeziorak w Iławie — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.');
+    addTripCredit('pol-dnia', 'Zdjęcie: ruiny zamku w Szymbarku — fot. 1bumer, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Szymbark,_zamek,_pierzeja_wschodnia.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+    addTripCredit('kamieniec-card', 'Zdjęcie: pałac w Kamieńcu — fot. Bardrock, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Pa%C5%82ac_w_Kamie%C5%84cu_%282011%29.JPG" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+    addTripCredit('kanal', 'Zdjęcie: pochylnia Buczyniec — fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski,_pochylnia_Buczyniec,_statek_na_w%C3%B3zku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+    addTripCredit('dalej', 'Zdjęcie: zamek w Malborku — fot. Holly (Hhoskins), CC BY-SA 3.0 PL, <a href="https://commons.wikimedia.org/wiki/File:Malbork_Castle_from_the_c.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+  }
+
+  if (currentPage === 'siemiany.html') {
+    const posterSources = [
+      ['www.infoilawa.pl', 'InfoIława.pl'],
+      ['d-nm.ppstatic.pl', 'Iława NaszeMiasto'],
+      ['mazury.travel', 'Mazury.travel']
+    ];
+    document.querySelectorAll('#wydarzenia .poster-card').forEach(card => {
+      if (card.querySelector('[data-image-credit]')) return;
+      const imageSrc = card.querySelector('img')?.getAttribute('src') || '';
+      const match = posterSources.find(([host]) => imageSrc.includes(host));
+      if (!match) return;
+      const credit = document.createElement('span');
+      credit.className = 'mini';
+      credit.dataset.imageCredit = '';
+      credit.textContent = `Źródło plakatu: ${match[1]} ↗`;
+      card.querySelector('img')?.insertAdjacentElement('afterend', credit);
+    });
+  }
+
+  if (currentPage === 'januszewo.html') {
+    const historicalFigure = document.querySelector('.page-hero-figure');
+    setFigureCaption(historicalFigure, 'Pałac w Januszewie przed zniszczeniem — źródło: <a href="https://polska-org.pl/foto/8741/Palac_Legowo_nie_istnieje_Legowo_8741526.jpg" rel="noopener" target="_blank">Polska-org.pl ↗</a>; autor i licencja nieustalone.');
+    const ruinsImage = [...document.querySelectorAll('figure img')].find(image =>
+      (image.getAttribute('src') || '').includes('Januszewo%206.%20Ruiny%20pa%C5%82acu')
+    );
+    setFigureCaption(ruinsImage?.closest('figure'), 'Ruiny pałacu w Januszewie — fot. Andrzej Błaszczak, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Januszewo_6._Ruiny_pa%C5%82acu_z_XVIII_wieku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+  }
+
+  if (currentPage === 'tajemnice.html') {
+    const ruinsImage = [...document.querySelectorAll('figure img')].find(image =>
+      (image.getAttribute('src') || '').includes('Januszewo%206.%20Ruiny%20pa%C5%82acu')
+    );
+    setFigureCaption(ruinsImage?.closest('figure'), 'Ruiny pałacu w Januszewie — fot. Andrzej Błaszczak, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Januszewo_6._Ruiny_pa%C5%82acu_z_XVIII_wieku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+  }
+
+  if (currentPage === 'pan-samochodzik.html') {
+    const nienackiHero = document.querySelector('.page-hero-figure');
+    setFigureCaption(nienackiHero, 'Dom Zbigniewa Nienackiego w Jerzwałdzie — archiwalne zdjęcie z nieistniejącej już strony nienacki.art.pl; autor i licencja nieustalone.');
+  }
+
+  if (currentPage === 'kanal-elblaski.html') {
+    const canalHero = document.querySelector('.page-hero-figure');
+    setFigureCaption(canalHero, 'Pochylnia Buczyniec — statek na wózku. Fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski,_pochylnia_Buczyniec,_statek_na_w%C3%B3zku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+  }
+
+  if (currentPage === 'jeziorak.html') {
+    const jeziorakHeroNote = document.querySelector('.page-hero .hero-note');
+    if (jeziorakHeroNote) jeziorakHeroNote.innerHTML = 'Jeziorak widziany z powietrza — źródło: <a href="https://miastoilawa.pl/uploaded_images/1623448307_jeziorak1.jpg" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.';
   }
 
   applyResponsivePhotos();
