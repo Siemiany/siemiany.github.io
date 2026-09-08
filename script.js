@@ -35,10 +35,15 @@ const responsivePhotos = {
     "height": 1086,
     "srcset": "assets/img/r/susz-plaza-miejska-480.webp 480w, assets/img/r/susz-plaza-miejska-800.webp 800w, assets/img/r/susz-plaza-miejska-1200.webp 1200w, assets/img/susz-plaza-miejska.webp 1448w"
   },
+  "assets/img/urowiec.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/urowiec-480.webp 480w, assets/img/r/urowiec-800.webp 800w, assets/img/r/urowiec-1200.webp 1200w, assets/img/urowiec.webp 1448w"
+  },
   "assets/img/wielka-zulawa-um-ilawa.webp": {
-    "width": 1800,
-    "height": 1200,
-    "srcset": "assets/img/r/wielka-zulawa-um-ilawa-480.webp 480w, assets/img/r/wielka-zulawa-um-ilawa-800.webp 800w, assets/img/r/wielka-zulawa-um-ilawa-1200.webp 1200w, assets/img/wielka-zulawa-um-ilawa.webp 1800w"
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/wielka-zulawa-um-ilawa-480.webp 480w, assets/img/r/wielka-zulawa-um-ilawa-800.webp 800w, assets/img/r/wielka-zulawa-um-ilawa-1200.webp 1200w, assets/img/wielka-zulawa-um-ilawa.webp 1448w"
   }
 };
 function applyResponsivePhotos(root = document) {
@@ -172,6 +177,18 @@ function applyResponsivePhotos(root = document) {
     'wielka-zulawa.html'
   ]);
   const currentPage = window.location.pathname.split('/').pop();
+
+  // Jeziora: karta Urowca ma korzystać z nowej, zoptymalizowanej fotografii.
+  if (currentPage === 'jeziora.html') {
+    const urowiecImage = document.querySelector('#urowiec img');
+    if (urowiecImage) {
+      urowiecImage.src = 'assets/img/urowiec.webp';
+      urowiecImage.srcset = 'assets/img/r/urowiec-480.webp 480w, assets/img/r/urowiec-800.webp 800w, assets/img/r/urowiec-1200.webp 1200w, assets/img/urowiec.webp 1448w';
+      urowiecImage.sizes = '(max-width: 760px) 100vw, 50vw';
+      urowiecImage.width = 1448;
+      urowiecImage.height = 1086;
+    }
+  }
 
   // Aktualna ocena Booking.com dla Zacisza Siemiany (sprawdzone 7.09.2026).
   if (currentPage === 'domek.html') {
@@ -438,6 +455,18 @@ function applyResponsivePhotos(root = document) {
   if (currentPage === 'kanal-elblaski.html') {
     const canalHero = document.querySelector('.page-hero-figure');
     setFigureCaption(canalHero, 'Pochylnia Buczyniec — statek na wózku. Fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski,_pochylnia_Buczyniec,_statek_na_w%C3%B3zku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+
+    const historyFigure = document.querySelector('#historia figure.place-photo');
+    const historyImage = historyFigure?.querySelector('img');
+    if (historyImage) {
+      historyImage.src = 'assets/img/kanal-elblaski-buczyniec.webp';
+      historyImage.srcset = 'assets/img/r/kanal-elblaski-buczyniec-480.webp 480w, assets/img/r/kanal-elblaski-buczyniec-800.webp 800w, assets/img/r/kanal-elblaski-buczyniec-1200.webp 1200w, assets/img/kanal-elblaski-buczyniec.webp 1537w';
+      historyImage.sizes = '(max-width: 760px) 100vw, 70vw';
+      historyImage.width = 1537;
+      historyImage.height = 1023;
+      historyImage.alt = 'Pochylnia Buczyniec na Kanale Elbląskim';
+    }
+    setFigureCaption(historyFigure, 'Pochylnia Buczyniec. Fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski%2C_pochylnia_Buczyniec.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
   }
 
   if (currentPage === 'jeziorak.html') {
