@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - feature/crazycopter-photo-refresh
+  pull_request:
+    branches:
+      - master
 
 permissions:
   contents: write
