@@ -406,7 +406,6 @@ function applyResponsivePhotos(root = document) {
 
   if (currentPage === 'okolica.html') {
     addTripCredit('ilawa', 'Zdjęcie: Mały Jeziorak w Iławie — źródło: <a href="https://miastoilawa.pl/" rel="noopener" target="_blank">Urząd Miasta Iławy ↗</a>.');
-    addTripCredit('pol-dnia', 'Zdjęcie: ruiny zamku w Szymbarku — fot. 1bumer, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Szymbark,_zamek,_pierzeja_wschodnia.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
     addTripCredit('kamieniec-card', 'Zdjęcie: pałac w Kamieńcu — fot. Bardrock, CC BY-SA 4.0, <a href="https://commons.wikimedia.org/wiki/File:Pa%C5%82ac_w_Kamie%C5%84cu_%282011%29.JPG" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
     addTripCredit('kanal', 'Zdjęcie: pochylnia Buczyniec — fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski,_pochylnia_Buczyniec,_statek_na_w%C3%B3zku.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
     addTripCredit('dalej', 'Zdjęcie: zamek w Malborku — fot. Holly (Hhoskins), CC BY-SA 3.0 PL, <a href="https://commons.wikimedia.org/wiki/File:Malbork_Castle_from_the_c.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
