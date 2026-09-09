@@ -1,0 +1,37 @@
+name: Update home trip durations
+
+on:
+  push:
+    branches:
+      - fix/home-trip-duration-list
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/home-trip-duration-list
+          fetch-depth: 0
+      - name: Update duration rows
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old = '''<div class="compact-row"><strong>Pół dnia lub dzień</strong><span>Pochylnie Kanału Elbląskiego - zależnie od wybranego rejsu i dojazdu</span><a href="okolica.html#kanal">Zobacz →</a></div>\n<div class="compact-row"><strong>Cały dzień</strong><span>Malbork i monumentalny zamek krzyżacki UNESCO</span><a href="okolica.html#dalej">Zobacz →</a></div>'''
+          new = '''<div class="compact-row"><strong>Cały dzień</strong><span>Pochylnie Kanału Elbląskiego oraz Malbork i monumentalny zamek krzyżacki UNESCO</span><a href="okolica.html">Zobacz →</a></div>'''
+          if old not in s:
+              raise SystemExit('Expected duration rows not found')
+          p.write_text(s.replace(old, new, 1))
+          PY
+          rm .github/workflows/update-home-trip-durations.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/update-home-trip-durations.yml
+          git commit -m "Update home trip duration list"
+          git push origin HEAD:fix/home-trip-duration-list
