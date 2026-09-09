@@ -412,25 +412,6 @@ function applyResponsivePhotos(root = document) {
     addTripCredit('dalej', 'Zdjęcie: zamek w Malborku — fot. Holly (Hhoskins), CC BY-SA 3.0 PL, <a href="https://commons.wikimedia.org/wiki/File:Malbork_Castle_from_the_c.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
   }
 
-  if (currentPage === 'siemiany.html') {
-    const posterSources = [
-      ['www.infoilawa.pl', 'InfoIława.pl'],
-      ['d-nm.ppstatic.pl', 'Iława NaszeMiasto'],
-      ['mazury.travel', 'Mazury.travel']
-    ];
-    document.querySelectorAll('#wydarzenia .poster-card').forEach(card => {
-      if (card.querySelector('[data-image-credit]')) return;
-      const imageSrc = card.querySelector('img')?.getAttribute('src') || '';
-      const match = posterSources.find(([host]) => imageSrc.includes(host));
-      if (!match) return;
-      const credit = document.createElement('span');
-      credit.className = 'mini';
-      credit.dataset.imageCredit = '';
-      credit.textContent = `Źródło plakatu: ${match[1]} ↗`;
-      card.querySelector('img')?.insertAdjacentElement('afterend', credit);
-    });
-  }
-
   if (currentPage === 'januszewo.html') {
     const historicalFigure = document.querySelector('.page-hero-figure');
     setFigureCaption(historicalFigure, 'Pałac w Januszewie przed zniszczeniem — źródło: <a href="https://polska-org.pl/foto/8741/Palac_Legowo_nie_istnieje_Legowo_8741526.jpg" rel="noopener" target="_blank">Polska-org.pl ↗</a>; autor i licencja nieustalone.');
@@ -467,6 +448,29 @@ function applyResponsivePhotos(root = document) {
       historyImage.alt = 'Pochylnia Buczyniec na Kanale Elbląskim';
     }
     setFigureCaption(historyFigure, 'Pochylnia Buczyniec. Fot. Wojciech Pędzich, CC BY 3.0, <a href="https://commons.wikimedia.org/wiki/File:Kana%C5%82_Elbl%C4%85ski%2C_pochylnia_Buczyniec.jpg" rel="noopener" target="_blank">Wikimedia Commons ↗</a>.');
+  }
+
+  if (currentPage === 'jerzwald.html') {
+    const parkIntro = document.querySelector('#park .intro');
+    if (parkIntro && !document.querySelector('#park [data-park-exhibition-photo]')) {
+      const figure = document.createElement('figure');
+      figure.className = 'place-photo';
+      figure.dataset.parkExhibitionPhoto = '';
+
+      const image = document.createElement('img');
+      image.src = 'assets/img/jerzwald-ekspozycja.webp';
+      image.alt = 'Multimedialna ekspozycja przyrodnicza w siedzibie Parku Krajobrazowego w Jerzwałdzie';
+      image.width = 1600;
+      image.height = 1067;
+      image.loading = 'lazy';
+      image.decoding = 'async';
+
+      const caption = document.createElement('figcaption');
+      caption.textContent = 'Ekspozycja przyrodnicza w siedzibie ZPK w Jerzwałdzie. Fot. Aleksandra Potrapeluk.';
+
+      figure.append(image, caption);
+      parkIntro.insertAdjacentElement('afterend', figure);
+    }
   }
 
   if (currentPage === 'jeziorak.html') {
