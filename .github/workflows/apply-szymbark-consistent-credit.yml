@@ -1,0 +1,39 @@
+name: Apply consistent Szymbark credit
+
+on:
+  push:
+    branches:
+      - fix/szymbark-credit-consistent
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/szymbark-credit-consistent
+          fetch-depth: 0
+      - name: Use the same external-credit component as other trip cards
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('script.js')
+          s = p.read_text()
+          marker = "    addTripCredit('ilawa', 'Zdjęcie: Mały Jeziorak w Iławie — źródło: <a href=\"https://miastoilawa.pl/\" rel=\"noopener\" target=\"_blank\">Urząd Miasta Iławy ↗</a>.');\n"
+          addition = marker + "    const szymbarkInlineCredit = document.querySelector('.trip#pol-dnia .source-note');\n    if (szymbarkInlineCredit?.textContent.includes('CrazyCopter')) szymbarkInlineCredit.remove();\n    addTripCredit('pol-dnia', 'Zdjęcie: ruiny zamku w Szymbarku — fot. <a href=\"https://www.crazycopter.pl/\" rel=\"noopener\" target=\"_blank\">Andrzej Budnik / CrazyCopter ↗</a>, wykorzystano za zgodą autora.');\n"
+          if "addTripCredit('pol-dnia'" in s:
+              raise SystemExit('Szymbark trip credit already present')
+          if marker not in s:
+              raise SystemExit('Insertion marker not found')
+          p.write_text(s.replace(marker, addition, 1))
+          PY
+          rm .github/workflows/apply-szymbark-consistent-credit.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add script.js .github/workflows/apply-szymbark-consistent-credit.yml
+          git commit -m "Use consistent Szymbark photo credit"
+          git push origin HEAD:fix/szymbark-credit-consistent
