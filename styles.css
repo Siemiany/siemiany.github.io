@@ -213,6 +213,7 @@ button{font:inherit}
 .video-facade .video-copy span{color:#d6dfda}
 .video-facade button{margin-top:18px;border:0;background:#fff;color:var(--forest-deep);font-weight:750;border-radius:999px;padding:12px 18px;cursor:pointer}
 .video-facade iframe{width:100%;height:100%;border:0;position:absolute;inset:0}
+.video-facade.playing:after{display:none}
 .deep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .deep-card{display:flex;flex-direction:column;min-height:280px;border:1px solid var(--line);background:var(--paper);border-radius:22px;padding:26px;transition:.2s}
 .deep-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
@@ -427,3 +428,27 @@ button{font:inherit}
 
 /* Okolica trip cards: keep photo credits visually attached to the image above */
 .trip .body>.external-credit:first-child{margin:-20px 0 16px;line-height:1.35}
+
+/* Dojazd do Siemian */
+.travel-origin-section{background:#edf1ec}
+.travel-origin-layout{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(420px,1.1fr);gap:54px;align-items:center}
+.travel-map-visual{position:relative;max-width:520px;margin:0 auto;aspect-ratio:1;background:rgba(255,253,248,.72);border:1px solid rgba(32,53,45,.12);border-radius:34px;box-shadow:var(--shadow);overflow:hidden}
+.travel-map-visual>img,.travel-map-visual>svg{position:absolute;inset:7%;width:86%;height:86%}
+.travel-map-visual>img{opacity:.38}
+.travel-map-visual>svg{overflow:visible}
+.travel-lines path{fill:none;stroke:var(--lake);stroke-width:4;stroke-linecap:round;stroke-dasharray:8 9;marker-end:url(#travel-arrow)}
+#travel-arrow path{fill:var(--lake)}
+.travel-cities circle{fill:var(--paper);stroke:var(--forest-deep);stroke-width:4}
+.travel-destination{fill:#d99b45;stroke:var(--paper);stroke-width:5;filter:drop-shadow(0 4px 7px rgba(32,53,45,.25))}
+.travel-label{font-family:var(--sans);font-size:22px;font-weight:750;fill:var(--forest-deep);paint-order:stroke;stroke:rgba(255,253,248,.9);stroke-width:6px;stroke-linejoin:round}
+.travel-time-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.travel-time-grid a{display:flex;min-height:150px;flex-direction:column;justify-content:center;padding:25px;border:1px solid rgba(32,53,45,.14);border-radius:20px;background:var(--paper);transition:transform .2s,box-shadow .2s}
+.travel-time-grid a:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.travel-time-grid span{font-size:13px;text-transform:uppercase;letter-spacing:.15em;color:var(--lake);font-weight:750}
+.travel-time-grid strong{font-family:var(--serif);font-size:29px;font-weight:500;line-height:1.15;margin:7px 0 10px}
+.travel-time-grid small{font-size:12px;color:var(--ink-soft)}
+.travel-origin-section .source-note{margin-top:24px}
+.rower-point-photo{max-width:520px}
+.rower-point-photo img{max-height:350px}
+@media(max-width:900px){.travel-origin-layout{grid-template-columns:1fr;gap:34px}.travel-map-visual{width:min(100%,520px)}}
+@media(max-width:600px){.travel-time-grid{grid-template-columns:1fr}.travel-time-grid a{min-height:0}.travel-map-visual{border-radius:24px}}
