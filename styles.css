@@ -432,7 +432,7 @@ button{font:inherit}
 /* Dojazd do Siemian */
 .travel-origin-section{background:#edf1ec}
 .travel-origin-layout{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(420px,1.1fr);gap:54px;align-items:center}
-.travel-map-visual{position:relative;max-width:520px;margin:0 auto;aspect-ratio:1;background:rgba(255,253,248,.72);border:1px solid rgba(32,53,45,.12);border-radius:34px;box-shadow:var(--shadow);overflow:hidden}
+.travel-map-visual{position:relative;width:100%;max-width:520px;margin:0 auto;aspect-ratio:1;background:rgba(255,253,248,.72);border:1px solid rgba(32,53,45,.12);border-radius:34px;box-shadow:var(--shadow);overflow:hidden}
 .travel-map-visual>img,.travel-map-visual>svg{position:absolute;inset:7%;width:86%;height:86%}
 .travel-map-visual>img{opacity:.38}
 .travel-map-visual>svg{overflow:visible}
@@ -448,7 +448,12 @@ button{font:inherit}
 .travel-time-grid strong{font-family:var(--serif);font-size:29px;font-weight:500;line-height:1.15;margin:7px 0 10px}
 .travel-time-grid small{font-size:12px;color:var(--ink-soft)}
 .travel-origin-section .source-note{margin-top:24px}
-.rower-point-photo{max-width:520px}
-.rower-point-photo img{max-height:350px}
 @media(max-width:900px){.travel-origin-layout{grid-template-columns:1fr;gap:34px}.travel-map-visual{width:min(100%,520px)}}
 @media(max-width:600px){.travel-time-grid{grid-template-columns:1fr}.travel-time-grid a{min-height:0}.travel-map-visual{border-radius:24px}}
+
+.split-photo{margin:0}
+.split-photo figcaption{margin-top:8px;font-size:13px;color:var(--ink-soft)}
+.archive-posters{grid-template-columns:repeat(3,minmax(0,1fr))}
+.archive-posters .poster-card{padding:8px;cursor:zoom-in}
+.archive-posters .poster-card img{aspect-ratio:4/5;object-fit:contain;border-radius:12px}
+@media(max-width:600px){.archive-posters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.archive-posters .poster-card{padding:4px}}
