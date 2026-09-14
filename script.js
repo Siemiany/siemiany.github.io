@@ -1,5 +1,55 @@
 // Responsive variants for the current photo set. Originals remain available as source files.
 const responsivePhotos = {
+  "assets/img/fortepian-jerzwald.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/fortepian-jerzwald-480.webp 480w, assets/img/r/fortepian-jerzwald-800.webp 800w, assets/img/r/fortepian-jerzwald-1200.webp 1200w, assets/img/fortepian-jerzwald.webp 1448w"
+  },
+  "assets/img/jerzwald-fortepian-kukly.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/jerzwald-fortepian-kukly-480.webp 480w, assets/img/r/jerzwald-fortepian-kukly-800.webp 800w, assets/img/r/jerzwald-fortepian-kukly-1200.webp 1200w, assets/img/jerzwald-fortepian-kukly.webp 1448w"
+  },
+  "assets/img/jerzwald-kanal.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "assets/img/r/jerzwald-kanal-480.webp 480w, assets/img/r/jerzwald-kanal-800.webp 800w, assets/img/jerzwald-kanal.webp 1086w"
+  },
+  "assets/img/jerzwald-kukly-fortepian.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/jerzwald-kukly-fortepian-480.webp 480w, assets/img/r/jerzwald-kukly-fortepian-800.webp 800w, assets/img/r/jerzwald-kukly-fortepian-1200.webp 1200w, assets/img/jerzwald-kukly-fortepian.webp 1448w"
+  },
+  "assets/img/jerzwald-kulka.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "assets/img/r/jerzwald-kulka-480.webp 480w, assets/img/r/jerzwald-kulka-800.webp 800w, assets/img/jerzwald-kulka.webp 1086w"
+  },
+  "assets/img/siemiany-nowa-infrastruktura-plaza.webp": {
+    "width": 1448,
+    "height": 965,
+    "srcset": "assets/img/r/siemiany-nowa-infrastruktura-plaza-480.webp 480w, assets/img/r/siemiany-nowa-infrastruktura-plaza-800.webp 800w, assets/img/r/siemiany-nowa-infrastruktura-plaza-1200.webp 1200w, assets/img/siemiany-nowa-infrastruktura-plaza.webp 1448w"
+  },
+  "assets/img/siemiany-stacja-ladowania-rowerow.webp": {
+    "width": 1086,
+    "height": 1448,
+    "srcset": "assets/img/r/siemiany-stacja-ladowania-rowerow-480.webp 480w, assets/img/r/siemiany-stacja-ladowania-rowerow-800.webp 800w, assets/img/siemiany-stacja-ladowania-rowerow.webp 1086w"
+  },
+  "assets/img/susz-plaza.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/susz-plaza-480.webp 480w, assets/img/r/susz-plaza-800.webp 800w, assets/img/r/susz-plaza-1200.webp 1200w, assets/img/susz-plaza.webp 1448w"
+  },
+  "assets/img/susz-plaza-2.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/susz-plaza-2-480.webp 480w, assets/img/r/susz-plaza-2-800.webp 800w, assets/img/r/susz-plaza-2-1200.webp 1200w, assets/img/susz-plaza-2.webp 1448w"
+  },
+  "assets/img/susz-plaza-hustawka.webp": {
+    "width": 1448,
+    "height": 1086,
+    "srcset": "assets/img/r/susz-plaza-hustawka-480.webp 480w, assets/img/r/susz-plaza-hustawka-800.webp 800w, assets/img/r/susz-plaza-hustawka-1200.webp 1200w, assets/img/susz-plaza-hustawka.webp 1448w"
+  },
   "assets/img/jeziorak-siemiany.webp": {
     "width": 1448,
     "height": 1086,
@@ -206,7 +256,7 @@ function applyResponsivePhotos(root = document) {
 
   // Susz: wykorzystujemy własne zdjęcia plaży i dużego placu zabaw dodane do repo.
   const suszPlaygroundSrc = 'assets/img/susz-plac-zabaw.webp';
-  const suszBeachSrc = 'assets/img/susz-plaza-miejska.webp';
+  const suszBeachSrc = 'assets/img/susz-plaza.webp';
 
   if (currentPage === 'susz.html') {
     const suszSection = document.querySelector('#susz');
