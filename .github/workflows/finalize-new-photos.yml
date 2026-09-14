@@ -1,0 +1,44 @@
+name: Finalize new photos
+
+on:
+  push:
+    branches: [new-photos]
+    paths:
+      - .github/workflows/finalize-new-photos.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: new-photos
+          fetch-depth: 0
+      - name: Fix photo credit and remove stale image variant
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('jerzwald.html')
+          text = path.read_text(encoding='utf-8')
+          old = '<div class="source-note">Zdjęcie fortepianu i opis idei wydarzenia: <a href="https://grupabiwakowa.pl/fortepian-na-lace-w-jerzwaldzie" rel="noopener" target="_blank">Grupabiwakowa.pl - Fortepian na łące w Jerzwałdzie</a>. Daty i lista artystów: kronika Jerzwald.pl.</div>'
+          new = '<div class="source-note">Źródła informacji o wydarzeniu: <a href="https://grupabiwakowa.pl/fortepian-na-lace-w-jerzwaldzie" rel="noopener" target="_blank">Grupabiwakowa.pl - Fortepian na łące w Jerzwałdzie</a> oraz kronika Jerzwald.pl. Zdjęcie powyżej jest własne.</div>'
+          if old not in text:
+              raise SystemExit('Expected old Jerzwald source note not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          stale = Path('assets/img/r/domek-lazienka-1200.webp')
+          if stale.exists():
+              stale.unlink()
+          PY
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git status --short
+          git commit -m "Doprecyzuj źródła zdjęć i usuń stary wariant łazienki"
+          git push origin HEAD:new-photos
