@@ -1,0 +1,93 @@
+name: Fix photo galleries
+
+on:
+  push:
+    branches: [fix-photo-galleries]
+    paths:
+      - .github/workflows/fix-photo-galleries.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix-photo-galleries
+          fetch-depth: 0
+      - name: Fix galleries and channel photo placement
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new, label):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              if old not in text:
+                  raise RuntimeError(f'Nie znaleziono wzorca: {label} w {path}')
+              text2 = text.replace(old, new, 1)
+              p.write_text(text2, encoding='utf-8')
+
+          # 1. Zdjęcia domku mogą być dopisywane tylko do galerii na domek.html.
+          replace_once(
+              'script.js',
+              "  const gallery = document.querySelector('.gallery');\n  if (gallery) {",
+              "  const gallery = window.location.pathname.endsWith('domek.html')\n    ? document.querySelector('.gallery')\n    : null;\n  if (gallery) {",
+              'globalny selector galerii domku'
+          )
+
+          # 2. Domek: łazienki zostają obok siebie, a salon zajmuje pełny rząd,
+          #    dzięki czemu grid nie zostawia pustego pola po prawej stronie.
+          replace_once(
+              'domek.html',
+              '<a class="gallery-half" data-lightbox="" href="assets/img/domek-salon-okna.webp">',
+              '<a class="gallery-full" data-lightbox="" href="assets/img/domek-salon-okna.webp">',
+              'kafel salonu w galerii domku'
+          )
+
+          # 3. Jerzwałd: zdjęcie kanału przenosimy na stronę Tajemnice,
+          #    tutaj zostaje opis i link do pełniejszego materiału.
+          replace_once(
+              'jerzwald.html',
+              '<figure class="place-photo"><img alt="Kanał Jerzwałdzki w lesie koło Jerzwałdu" decoding="async" height="1448" loading="lazy" sizes="(max-width: 760px) 100vw, 70vw" src="assets/img/jerzwald-kanal.webp" srcset="assets/img/r/jerzwald-kanal-480.webp 480w, assets/img/r/jerzwald-kanal-800.webp 800w, assets/img/jerzwald-kanal.webp 1086w" width="1086"/><figcaption>Kanał Jerzwałdzki / Zdryński - zdjęcie własne.</figcaption></figure>',
+              '',
+              'zdjęcie kanału na stronie Jerzwałdu'
+          )
+
+          # Usuń link do Grupabiwakowa z przycisków i noty źródłowej.
+          replace_once(
+              'jerzwald.html',
+              '<div class="route-actions"><a class="btn primary" href="https://grupabiwakowa.pl/fortepian-na-lace-w-jerzwaldzie" rel="noopener" target="_blank">Fortepian na łące - Grupabiwakowa.pl ↗</a><a class="btn ghost" href="https://jerzwald.pl/koncerty-organizowane-przez-mirka-mastalerza-ktore-odbyly-sie-w-jerzwaldzie-2/" rel="noopener" target="_blank">Archiwum koncertów ↗</a></div>',
+              '<div class="route-actions"><a class="btn ghost" href="https://jerzwald.pl/koncerty-organizowane-przez-mirka-mastalerza-ktore-odbyly-sie-w-jerzwaldzie-2/" rel="noopener" target="_blank">Archiwum koncertów ↗</a></div>',
+              'przycisk Grupabiwakowa'
+          )
+          replace_once(
+              'jerzwald.html',
+              '<div class="source-note">Źródła informacji o wydarzeniu: <a href="https://grupabiwakowa.pl/fortepian-na-lace-w-jerzwaldzie" rel="noopener" target="_blank">Grupabiwakowa.pl - Fortepian na łące w Jerzwałdzie</a> oraz kronika Jerzwald.pl. Zdjęcie fortepianu jest własne.</div>',
+              '<div class="source-note">Źródło informacji o wydarzeniu: kronika Jerzwald.pl. Zdjęcie fortepianu jest własne.</div>',
+              'nota źródłowa Grupabiwakowa'
+          )
+
+          # 4. Tajemnice: zdjęcie kanału trafia do pełnego artykułu.
+          channel_intro = '<section id="kanal-zdrynski"><h2>Kanał Jerzwałdzki / Zdryński - zagadka z militarnym tłem</h2><p class="intro">To nie jest krótki rów w lesie. Cała trasa od Jeziora Płaskiego do nagłego końca przy poprzecznej grobli ma blisko <strong>2,4 km</strong>, z czego około <strong>0,7 km</strong> prowadzi przez dwa śródleśne jeziora: Twaruczek i Zdryńskie.</p>'
+          channel_with_photo = channel_intro + '<figure class="place-photo"><img alt="Kanał Jerzwałdzki w lesie koło Jerzwałdu" decoding="async" height="1448" loading="lazy" sizes="(max-width: 760px) 100vw, 70vw" src="assets/img/jerzwald-kanal.webp" srcset="assets/img/r/jerzwald-kanal-480.webp 480w, assets/img/r/jerzwald-kanal-800.webp 800w, assets/img/jerzwald-kanal.webp 1086w" width="1086"/><figcaption>Kanał Jerzwałdzki / Zdryński - zdjęcie własne.</figcaption></figure>'
+          replace_once('tajemnice.html', channel_intro, channel_with_photo, 'miejsce zdjęcia kanału w Tajemnicach')
+
+          replace_once(
+              'tajemnice.html',
+              '<a class="btn ghost" href="jerzwald.html#kanal">Kanał na stronie Jerzwałdu</a>',
+              '',
+              'zwrotny link do skrótu kanału w Jerzwałdzie'
+          )
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add script.js domek.html jerzwald.html tajemnice.html
+          git diff --check
+          git status --short
+          git commit -m "Napraw galerie zdjęć i sekcję Kanału Jerzwałdzkiego"
+          git push origin HEAD:fix-photo-galleries
