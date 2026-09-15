@@ -146,7 +146,9 @@ function applyResponsivePhotos(root = document) {
     }
   }
 
-  const gallery = document.querySelector('.gallery');
+  const gallery = window.location.pathname.endsWith('domek.html')
+    ? document.querySelector('.gallery')
+    : null;
   if (gallery) {
     // Zachowujemy dotychczasowe zdjęcie tarasu w galerii.
     const originalTerraceLink = [...gallery.querySelectorAll('a[data-lightbox]')]
